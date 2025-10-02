@@ -1,0 +1,15 @@
+{
+  "name": "simple-counter-app",
+  "private": true,
+  "dependencies": {
+    "@rails/webpacker": "5.4.4",
+    "@rails/ujs": "^7.0.0",
+    "@rails/activestorage": "^7.0.0",
+    "turbo-rails": "^1.0.0",
+    "@hotwired/stimulus": "^3.0.0"
+  },
+  "version": "0.1.0",
+  "devDependencies": {
+    "webpack-dev-server": "^4"
+  }
+}

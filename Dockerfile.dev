@@ -1,0 +1,36 @@
+# Development Dockerfile for Rails application
+FROM ruby:3.2.0
+
+# Install system dependencies
+RUN apt-get update -qq && apt-get install -y \
+  nodejs \
+  postgresql-client \
+  sqlite3 \
+  curl \
+  build-essential \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+  && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+  && apt-get update && apt-get install -y yarn
+
+# Set working directory
+WORKDIR /workspace/app
+
+# Install gems
+COPY app/Gemfile app/Gemfile.lock ./
+RUN bundle install
+
+# Install JavaScript dependencies
+COPY app/package.json app/yarn.lock ./
+RUN yarn install --check-files
+
+# Copy application code
+COPY app/ .
+
+# Expose port
+EXPOSE 3000
+
+# Default command
+CMD ["rails", "server", "-b", "0.0.0.0"]

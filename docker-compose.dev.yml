@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack:3.0
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/tmp/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  rails-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace:cached
+      - rails_bundle:/usr/local/bundle
+      - rails_node_modules:/workspace/app/node_modules
+    environment:
+      - RAILS_ENV=development
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - REDIS_URL=redis://redis:6379/0
+      - COUNTER_QUEUE_URL=http://localstack:4566/000000000000/counter-queue
+    depends_on:
+      - localstack
+      - redis
+    networks:
+      - app-network
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/workspace:cached
+      - rails_bundle:/usr/local/bundle
+    environment:
+      - RAILS_ENV=development
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - REDIS_URL=redis://redis:6379/0
+      - COUNTER_QUEUE_URL=http://localstack:4566/000000000000/counter-queue
+    depends_on:
+      - localstack
+      - redis
+      - rails-dev
+    networks:
+      - app-network
+    working_dir: /workspace/app
+    command: bundle exec sidekiq
+
+volumes:
+  rails_bundle:
+  rails_node_modules:
+
+networks:
+  app-network:
+    driver: bridge

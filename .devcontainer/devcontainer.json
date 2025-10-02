@@ -1,0 +1,59 @@
+{
+  "name": "Rails + AWS + LocalStack Development",
+  "dockerComposeFile": "../docker-compose.dev.yml",
+  "service": "rails-dev",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "1.5"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.Ruby",
+        "kaiwood.endwise",
+        "castwide.solargraph",
+        "ms-vscode.vscode-json",
+        "HashiCorp.terraform",
+        "ms-vscode.aws-toolkit",
+        "localstack.localstack-toolkit"
+      ],
+      "settings": {
+        "ruby.intellisense": "rubyLocate",
+        "ruby.codeCompletion": "rcodetools",
+        "aws.telemetry": false,
+        "localstack.endpoint": "http://localstack:4566"
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 4566],
+  "portsAttributes": {
+    "3000": {
+      "label": "Rails Server",
+      "onAutoForward": "notify"
+    },
+    "4566": {
+      "label": "LocalStack",
+      "onAutoForward": "silent"
+    }
+  },
+
+  "postCreateCommand": "bash /workspace/scripts/setup.sh",
+  
+  "remoteEnv": {
+    "AWS_DEFAULT_REGION": "us-east-1",
+    "AWS_ACCESS_KEY_ID": "test",
+    "AWS_SECRET_ACCESS_KEY": "test",
+    "LOCALSTACK_ENDPOINT": "http://localstack:4566",
+    "RAILS_ENV": "development"
+  }
+}
