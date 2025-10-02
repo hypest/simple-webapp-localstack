@@ -1,0 +1,51 @@
+# Production Dockerfile for Rails application
+FROM ruby:3.2.0-slim
+
+# Install system dependencies
+RUN apt-get update -qq && apt-get install -y \
+  nodejs \
+  npm \
+  sqlite3 \
+  curl \
+  build-essential \
+  libsqlite3-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Yarn
+RUN npm install -g yarn
+
+# Set working directory
+WORKDIR /opt/rails-app
+
+# Copy Gemfile and install gems
+COPY app/Gemfile app/Gemfile.lock ./
+RUN bundle config set --local deployment 'true' \
+  && bundle config set --local without 'development test' \
+  && bundle install
+
+# Copy package.json and install JavaScript dependencies
+COPY app/package.json app/yarn.lock ./
+RUN yarn install --production --frozen-lockfile
+
+# Copy application code
+COPY app/ .
+
+# Precompile assets
+ENV RAILS_ENV=production
+ENV SECRET_KEY_BASE=dummy_secret_for_precompile
+RUN bundle exec rails assets:precompile
+
+# Create non-root user
+RUN groupadd -r rails && useradd -r -g rails rails
+RUN chown -R rails:rails /opt/rails-app
+USER rails
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Default command
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]

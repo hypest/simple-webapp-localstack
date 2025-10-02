@@ -1,0 +1,24 @@
+# AWS Configuration
+aws_region = "us-east-1"
+
+# Environment Configuration
+environment = "production"
+project_name = "simple-counter-app"
+
+# Application Configuration
+app_image_uri = "123456789012.dkr.ecr.us-east-1.amazonaws.com/simple-counter-app-production:latest"
+
+# Infrastructure Sizing
+instance_type = "t3.small"
+min_size = 2
+max_size = 10
+desired_capacity = 3
+
+# Network Configuration
+vpc_cidr = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
+
+# Optional: SSL and Domain (uncomment and configure if needed)
+# ssl_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/your-cert-id"
+# domain_name = "counter-app.yourdomain.com"
