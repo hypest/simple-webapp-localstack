@@ -32,6 +32,12 @@ variable "project_name" {
   default     = "simple-counter-app"
 }
 
+variable "app_image_uri" {
+  description = "Docker image URI for the Rails application"
+  type        = string
+  default     = "localhost:5000/rails-counter-app:latest"
+}
+
 # Outputs
 output "counter_queue_url" {
   description = "URL of the counter SQS queue"

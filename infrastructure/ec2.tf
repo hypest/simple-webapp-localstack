@@ -68,6 +68,7 @@ resource "aws_launch_template" "rails_app" {
     counter_queue_url   = aws_sqs_queue.counter_queue.url
     region              = "us-east-1"
     localstack_endpoint = "http://localstack:4566"
+    app_image_uri       = var.app_image_uri
   }))
 
   tag_specifications {

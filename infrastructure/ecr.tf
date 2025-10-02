@@ -1,42 +1,13 @@
-# ECR Repository for storing Docker images
-resource "aws_ecr_repository" "rails_app" {
-  name                 = "rails-counter-app"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-
-  tags = {
-    Name        = "rails-counter-app-ecr"
-    Environment = "development"
-    Project     = "simple-counter-app"
-  }
-}
-
-# ECR Repository Policy
-resource "aws_ecr_repository_policy" "rails_app" {
-  repository = aws_ecr_repository.rails_app.name
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowPullPush"
-        Effect = "Allow"
-        Principal = {
-          AWS = "*"
-        }
-        Action = [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:PutImage",
-          "ecr:InitiateLayerUpload",
-          "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload"
-        ]
-      }
-    ]
-  })
-}
+# ECR is NOT included in LocalStack free tier
+# Instead, we use a local Docker registry running on localhost:5000
+# 
+# The local registry is configured in docker-compose.dev.yml and provides
+# the same functionality for development and testing purposes.
+#
+# For production deployments to real AWS, ECR will be configured in
+# the environments/production directory.
+#
+# This approach allows:
+# 1. Free LocalStack development without ECR limitations
+# 2. Same deployment workflow between local and production
+# 3. Proper container registry in production

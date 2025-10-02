@@ -32,14 +32,26 @@ error() {
 # Configuration
 if [ "$ENVIRONMENT" = "localstack" ]; then
     AWS_ENDPOINT="--endpoint-url=http://localhost:4566"
-    REGISTRY_URI="localhost:4566/rails-counter-app"
+    REGISTRY_URI="localhost:5000/rails-counter-app"  # Use local Docker registry
+    USE_ECR=false
     TF_VAR_environment="development"
-    log "🏠 Deploying to LocalStack environment"
+    log "🏠 Deploying to LocalStack environment (using local Docker registry)"
 elif [ "$ENVIRONMENT" = "aws" ]; then
     AWS_ENDPOINT=""
-    REGISTRY_URI="YOUR_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/rails-counter-app"
+    # Check if ECR repository exists or use fallback
+    ECR_REPO_URI=$(aws ecr describe-repositories --repository-names rails-counter-app --query 'repositories[0].repositoryUri' --output text 2>/dev/null || echo "")
+    if [ -n "$ECR_REPO_URI" ] && [ "$ECR_REPO_URI" != "None" ]; then
+        REGISTRY_URI="$ECR_REPO_URI"
+        USE_ECR=true
+        log "☁️  Deploying to AWS environment (using ECR: $ECR_REPO_URI)"
+    else
+        # Fallback to account-based ECR URI - user needs to create the repo
+        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text 2>/dev/null || echo "YOUR_AWS_ACCOUNT")
+        REGISTRY_URI="$ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/rails-counter-app"
+        USE_ECR=true
+        warn "ECR repository not found. Please create it first or the image will be: $REGISTRY_URI"
+    fi
     TF_VAR_environment="production"
-    log "☁️  Deploying to AWS environment"
 else
     error "Invalid environment. Use 'localstack' or 'aws'"
 fi
@@ -55,17 +67,29 @@ docker build -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:$VERSION"
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:latest"
 
-# Step 3: Push to registry (ECR for LocalStack or real ECR)
+# Step 3: Push to registry
 log "📦 Pushing image to registry..."
 if [ "$ENVIRONMENT" = "localstack" ]; then
-    # For LocalStack, we can push directly
+    # For LocalStack, use local Docker registry (no authentication needed)
+    log "Using local Docker registry at localhost:5000"
     docker push "$REGISTRY_URI:$VERSION"
     docker push "$REGISTRY_URI:latest"
-elif [ "$ENVIRONMENT" = "aws" ]; then
-    # For real AWS, need to authenticate with ECR first
-    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$REGISTRY_URI"
+elif [ "$ENVIRONMENT" = "aws" ] && [ "$USE_ECR" = "true" ]; then
+    # For real AWS with ECR, authenticate first
+    log "Authenticating with ECR..."
+    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$(echo $REGISTRY_URI | cut -d'/' -f1)"
+    
+    # Create ECR repository if it doesn't exist
+    REPO_NAME=$(echo $REGISTRY_URI | cut -d'/' -f2)
+    aws ecr describe-repositories --repository-names "$REPO_NAME" >/dev/null 2>&1 || {
+        log "Creating ECR repository: $REPO_NAME"
+        aws ecr create-repository --repository-name "$REPO_NAME"
+    }
+    
     docker push "$REGISTRY_URI:$VERSION"
     docker push "$REGISTRY_URI:latest"
+else
+    error "Unsupported registry configuration"
 fi
 
 # Step 4: Apply Terraform configuration

@@ -18,7 +18,6 @@ provider "aws" {
   endpoints {
     sqs = "http://localstack:4566"
     ec2 = "http://localstack:4566"
-    ecr = "http://localstack:4566"
     iam = "http://localstack:4566"
   }
 }

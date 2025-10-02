@@ -6,7 +6,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=sqs,ec2,ecr,iam,autoscaling,elbv2
+      - SERVICES=sqs,ec2,iam,autoscaling,elbv2
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
@@ -14,6 +14,17 @@ services:
     volumes:
       - "/tmp/localstack:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - app-network
+
+  registry:
+    image: registry:2
+    ports:
+      - "5000:5000"
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+    volumes:
+      - registry_data:/data
     networks:
       - app-network
 
@@ -78,6 +89,7 @@ services:
 volumes:
   rails_bundle:
   rails_node_modules:
+  registry_data:
 
 networks:
   app-network:

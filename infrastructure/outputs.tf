@@ -28,12 +28,10 @@ output "autoscaling_group_name" {
   value       = aws_autoscaling_group.rails_app.name
 }
 
-output "ecr_repository_url" {
-  description = "URL of the ECR repository"
-  value       = aws_ecr_repository.rails_app.repository_url
-}
+# ECR outputs removed - using local Docker registry for LocalStack
+# Registry is available at localhost:5000 for LocalStack deployments
 
-output "ecr_repository_name" {
-  description = "Name of the ECR repository"
-  value       = aws_ecr_repository.rails_app.name
+output "local_registry_url" {
+  description = "URL of the local Docker registry (for LocalStack)"
+  value       = "localhost:5000"
 }
