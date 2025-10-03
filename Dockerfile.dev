@@ -1,19 +1,17 @@
-# Development Dockerfile for Rails application
-FROM ruby:3.2.0
+# Development Dockerfile for Rails application - Debian-based for devcontainer compatibility
+FROM ruby:3.2-slim
 
 # Install system dependencies
 RUN apt-get update -qq && apt-get install -y \
+  build-essential \
   nodejs \
+  npm \
   postgresql-client \
   sqlite3 \
   curl \
-  build-essential \
+  git \
+  && npm install -g yarn \
   && rm -rf /var/lib/apt/lists/*
-
-# Install Yarn
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-  && apt-get install -y nodejs \
-  && npm install -g yarn
 
 # Set working directory
 WORKDIR /workspace/app
