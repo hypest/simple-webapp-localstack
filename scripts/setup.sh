@@ -62,6 +62,10 @@ cd /workspace/infrastructure
 # Initialize Terraform
 terraform init
 
+# Start supporting services (Redis, Registry)
+echo "🔧 Starting supporting services..."
+bash /workspace/scripts/start-supporting-services.sh
+
 # Start LocalStack using Docker-in-Docker
 echo "🐳 Starting LocalStack using Docker-in-Docker..."
 bash /workspace/scripts/start-localstack.sh

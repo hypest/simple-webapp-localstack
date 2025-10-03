@@ -1,9 +1,7 @@
 {
   "name": "Rails + AWS + LocalStack Development",
-  "dockerComposeFile": "../docker-compose.dev.yml",
-  "service": "rails-dev",
+  "image": "mcr.microsoft.com/devcontainers/ruby:3.2-bookworm",
   "workspaceFolder": "/workspace",
-  "shutdownAction": "stopCompose",
   
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -20,6 +18,11 @@
     "ghcr.io/localstack/devcontainer-feature/localstack-cli": {},
     "ghcr.io/devcontainers/features/node:1": {
       "version": "18"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
     }
   },
 
@@ -66,8 +69,12 @@
     "AWS_DEFAULT_REGION": "us-east-1",
     "AWS_ACCESS_KEY_ID": "test",
     "AWS_SECRET_ACCESS_KEY": "test",
-        "LOCALSTACK_ENDPOINT": "http://localhost:4566",
+    "LOCALSTACK_ENDPOINT": "http://localhost:4566",
     "RAILS_ENV": "development",
-    "DOCKER_HOST": "unix:///var/run/docker.sock"
-  }
+    "DOCKER_HOST": "unix:///var/run/docker.sock",
+    "REDIS_URL": "redis://localhost:6379/0",
+    "COUNTER_QUEUE_URL": "http://localhost:4566/000000000000/counter-queue"
+  },
+
+  "postStartCommand": "bash /workspace/scripts/start-supporting-services.sh"
 }
