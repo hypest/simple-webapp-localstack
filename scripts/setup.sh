@@ -7,14 +7,20 @@ echo "🚀 Setting up Rails + LocalStack development environment..."
 # Navigate to the app directory
 cd /workspace/app
 
-# Install Ruby gems
-echo "📦 Installing Ruby gems..."
-bundle install
+# Install Ruby gems (if Gemfile exists)
+if [ -f "Gemfile" ]; then
+    echo "📦 Installing Ruby gems..."
+    bundle install
+else
+    echo "⚠️  No Gemfile found, skipping gem installation"
+fi
 
 # Install JavaScript dependencies (if package.json exists)
 if [ -f "package.json" ]; then
     echo "📦 Installing JavaScript dependencies..."
     yarn install
+else
+    echo "⚠️  No package.json found, skipping JavaScript dependencies"
 fi
 
 # Set up the database
@@ -41,8 +47,13 @@ production:
 EOF
 fi
 
-# Create database if it doesn't exist
-rails db:create 2>/dev/null || echo "Database already exists or will be created on first migration"
+# Create database if Rails is available
+if command -v rails >/dev/null 2>&1 && [ -f "Gemfile" ]; then
+    echo "Creating database..."
+    rails db:create 2>/dev/null || echo "Database already exists or will be created on first migration"
+else
+    echo "⚠️  Rails not available yet, skipping database creation"
+fi
 
 # Navigate to infrastructure directory and set up Terraform
 echo "🏗️ Setting up Terraform infrastructure..."

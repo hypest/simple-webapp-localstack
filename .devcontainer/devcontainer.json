@@ -35,7 +35,7 @@
     }
   },
 
-  "forwardPorts": [3000, 4566],
+  "forwardPorts": [3000, 4566, 5000],
   "portsAttributes": {
     "3000": {
       "label": "Rails Server",
@@ -43,6 +43,10 @@
     },
     "4566": {
       "label": "LocalStack",
+      "onAutoForward": "silent"
+    },
+    "5000": {
+      "label": "Docker Registry",
       "onAutoForward": "silent"
     }
   },

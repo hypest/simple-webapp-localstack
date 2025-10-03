@@ -17,5 +17,10 @@ module SimpleCounterApp
     
     # SQS Configuration
     config.counter_queue_url = ENV.fetch("COUNTER_QUEUE_URL", "http://localhost:4566/000000000000/counter-queue")
+    
+    # Allow connections from devcontainer and LocalStack
+    config.hosts << "rails-dev"
+    config.hosts << /.*\.localstack\.cloud/
+    config.hosts << /.*\.localhost/
   end
 end
