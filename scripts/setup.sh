@@ -4,8 +4,14 @@
 
 echo "🚀 Setting up Rails + LocalStack development environment..."
 
+# Get the script directory and workspace root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
+
+echo "📁 Working in: $WORKSPACE_ROOT"
+
 # Navigate to the app directory
-cd /workspace/app
+cd "$WORKSPACE_ROOT/app"
 
 # Install Ruby gems (if Gemfile exists)
 if [ -f "Gemfile" ]; then
@@ -57,18 +63,18 @@ fi
 
 # Navigate to infrastructure directory and set up Terraform
 echo "🏗️ Setting up Terraform infrastructure..."
-cd /workspace/infrastructure
+cd "$WORKSPACE_ROOT/infrastructure"
 
 # Initialize Terraform
 terraform init
 
 # Start supporting services (Redis, Registry)
 echo "🔧 Starting supporting services..."
-bash /workspace/scripts/start-supporting-services.sh
+bash "$WORKSPACE_ROOT/scripts/start-supporting-services.sh"
 
 # Start LocalStack using Docker-in-Docker
 echo "🐳 Starting LocalStack using Docker-in-Docker..."
-bash /workspace/scripts/start-localstack.sh
+bash "$WORKSPACE_ROOT/scripts/start-localstack.sh"
 
 # Apply Terraform configuration
 echo "🔧 Applying Terraform configuration..."
@@ -88,5 +94,5 @@ echo "- rails server: Start the Rails server"
 echo "- terraform plan: Preview infrastructure changes"
 echo "- terraform apply: Apply infrastructure changes"
 echo "- aws --endpoint-url=http://localhost:4566 sqs list-queues: List SQS queues"
-echo "- bash /workspace/scripts/start-localstack.sh: Start LocalStack"
-echo "- bash /workspace/scripts/stop-localstack.sh: Stop LocalStack"
+echo "- bash ./scripts/start-localstack.sh: Start LocalStack"
+echo "- bash ./scripts/stop-localstack.sh: Stop LocalStack"

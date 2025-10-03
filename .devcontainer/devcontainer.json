@@ -1,7 +1,6 @@
 {
   "name": "Rails + AWS + LocalStack Development",
   "image": "mcr.microsoft.com/devcontainers/ruby:3.2-bookworm",
-  "workspaceFolder": "/workspace",
   
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -63,7 +62,7 @@
     }
   },
 
-  "postCreateCommand": "bash /workspace/scripts/setup.sh",
+  "postCreateCommand": "echo 'Container created, workspace will be mounted next'",
   
   "remoteEnv": {
     "AWS_DEFAULT_REGION": "us-east-1",
@@ -76,5 +75,5 @@
     "COUNTER_QUEUE_URL": "http://localhost:4566/000000000000/counter-queue"
   },
 
-  "postStartCommand": "bash /workspace/scripts/start-supporting-services.sh"
+  "postStartCommand": "bash -c 'cd /workspaces/* 2>/dev/null || cd /workspace 2>/dev/null; pwd; bash scripts/setup.sh'"
 }

@@ -47,7 +47,8 @@ done
 echo "LocalStack is ready!"
 
 # Initialize LocalStack resources if needed
-if [ -f "/workspace/scripts/init-localstack.sh" ]; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/init-localstack.sh" ]; then
     echo "Running LocalStack initialization script..."
-    bash /workspace/scripts/init-localstack.sh
+    bash "$SCRIPT_DIR/init-localstack.sh"
 fi
