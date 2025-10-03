@@ -25,8 +25,8 @@ case "${1:-help}" in
         
         # Check registry health
         for i in {1..30}; do
-            if curl -sf http://localhost:5000/v2/ >/dev/null 2>&1; then
-                log "✅ Local Docker registry is healthy at localhost:5000"
+            if curl -sf http://localhost:5001/v2/ >/dev/null 2>&1; then
+                log "✅ Local Docker registry is healthy at localhost:5001"
                 break
             else
                 log "⏳ Waiting for registry to be ready... (attempt $i/30)"
@@ -35,25 +35,25 @@ case "${1:-help}" in
         done
         
         log "📋 Registry bridge configured. LocalStack EC2 instances can now access:"
-        log "   - localhost:5000 (from host)"
+        log "   - localhost:5001 (from host)"
         log "   - registry:5000 (from within Docker network)"
         ;;
     
     "status")
         log "📊 Checking registry status..."
         
-        if curl -sf http://localhost:5000/v2/ >/dev/null 2>&1; then
-            log "✅ Registry is running at localhost:5000"
+        if curl -sf http://localhost:5001/v2/ >/dev/null 2>&1; then
+            log "✅ Registry is running at localhost:5001"
             
             # List available images
-            CATALOG=$(curl -s http://localhost:5000/v2/_catalog 2>/dev/null || echo '{"repositories":[]}')
+            CATALOG=$(curl -s http://localhost:5001/v2/_catalog 2>/dev/null || echo '{"repositories":[]}')
             REPOS=$(echo "$CATALOG" | grep -o '"repositories":\[[^]]*\]' | sed 's/"repositories":\[//;s/\]$//' | tr -d '"' | tr ',' '\n')
             
             if [ -n "$REPOS" ] && [ "$REPOS" != "" ]; then
                 log "📦 Available images:"
                 echo "$REPOS" | while read -r repo; do
                     if [ -n "$repo" ]; then
-                        TAGS=$(curl -s "http://localhost:5000/v2/$repo/tags/list" 2>/dev/null | grep -o '"tags":\[[^]]*\]' | sed 's/"tags":\[//;s/\]$//' | tr -d '"' | tr ',' ' ')
+                        TAGS=$(curl -s "http://localhost:5001/v2/$repo/tags/list" 2>/dev/null | grep -o '"tags":\[[^]]*\]' | sed 's/"tags":\[//;s/\]$//' | tr -d '"' | tr ',' ' ')
                         log "   - $repo: $TAGS"
                     fi
                 done
@@ -74,13 +74,13 @@ case "${1:-help}" in
         
         # Create a simple test image
         docker run --rm -d --name test-nginx nginx:alpine
-        docker commit test-nginx "localhost:5000/$IMAGE_NAME:$TAG"
+        docker commit test-nginx "localhost:5001/$IMAGE_NAME:$TAG"
         docker rm -f test-nginx
         
         # Push to registry
-        docker push "localhost:5000/$IMAGE_NAME:$TAG"
+        docker push "localhost:5001/$IMAGE_NAME:$TAG"
         
-        log "✅ Test image pushed: localhost:5000/$IMAGE_NAME:$TAG"
+        log "✅ Test image pushed: localhost:5001/$IMAGE_NAME:$TAG"
         ;;
     
     "clean")
@@ -103,7 +103,7 @@ case "${1:-help}" in
         echo "  clean               - Clean up registry data"
         echo "  help                - Show this help message"
         echo ""
-        echo "The registry runs at localhost:5000 and provides Docker image"
+        echo "The registry runs at localhost:5001 and provides Docker image"
         echo "storage for LocalStack deployments without requiring ECR."
         ;;
 esac

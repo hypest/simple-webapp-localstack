@@ -29,9 +29,9 @@ output "autoscaling_group_name" {
 }
 
 # ECR outputs removed - using local Docker registry for LocalStack
-# Registry is available at localhost:5000 for LocalStack deployments
+# Registry is available at localhost:5001 for LocalStack deployments
 
 output "local_registry_url" {
   description = "URL of the local Docker registry (for LocalStack)"
-  value       = "localhost:5000"
+  value       = "localhost:5001"
 }

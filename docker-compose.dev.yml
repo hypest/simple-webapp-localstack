@@ -1,26 +1,10 @@
 version: '3.8'
 
 services:
-  localstack:
-    image: localstack/localstack:3.0
-    ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=sqs,ec2,iam,autoscaling,elbv2
-      - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - LOCALSTACK_HOST_TMP_FOLDER=/tmp/localstack
-    volumes:
-      - "/tmp/localstack:/tmp/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    networks:
-      - app-network
-
   registry:
     image: registry:2
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
     volumes:
@@ -50,11 +34,10 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - LOCALSTACK_ENDPOINT=http://localhost:4566
       - REDIS_URL=redis://redis:6379/0
-      - COUNTER_QUEUE_URL=http://localstack:4566/000000000000/counter-queue
+      - COUNTER_QUEUE_URL=http://localhost:4566/000000000000/counter-queue
     depends_on:
-      - localstack
       - redis
     networks:
       - app-network
@@ -74,11 +57,10 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - LOCALSTACK_ENDPOINT=http://localhost:4566
       - REDIS_URL=redis://redis:6379/0
-      - COUNTER_QUEUE_URL=http://localstack:4566/000000000000/counter-queue
+      - COUNTER_QUEUE_URL=http://localhost:4566/000000000000/counter-queue
     depends_on:
-      - localstack
       - redis
       - rails-dev
     networks:

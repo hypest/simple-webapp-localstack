@@ -62,12 +62,9 @@ cd /workspace/infrastructure
 # Initialize Terraform
 terraform init
 
-# Wait for LocalStack to be ready
-echo "⏳ Waiting for LocalStack to be ready..."
-while ! curl -s http://localstack:4566/health > /dev/null; do
-    echo "Waiting for LocalStack..."
-    sleep 2
-done
+# Start LocalStack using Docker-in-Docker
+echo "🐳 Starting LocalStack using Docker-in-Docker..."
+bash /workspace/scripts/start-localstack.sh
 
 # Apply Terraform configuration
 echo "🔧 Applying Terraform configuration..."
@@ -86,4 +83,6 @@ echo "🔍 Useful commands:"
 echo "- rails server: Start the Rails server"
 echo "- terraform plan: Preview infrastructure changes"
 echo "- terraform apply: Apply infrastructure changes"
-echo "- aws --endpoint-url=http://localstack:4566 sqs list-queues: List SQS queues"
+echo "- aws --endpoint-url=http://localhost:4566 sqs list-queues: List SQS queues"
+echo "- bash /workspace/scripts/start-localstack.sh: Start LocalStack"
+echo "- bash /workspace/scripts/stop-localstack.sh: Stop LocalStack"

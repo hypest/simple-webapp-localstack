@@ -34,11 +34,11 @@ REDIS_URL=redis://localhost:6379/0
 EOF
 
 # Check if we need to configure Docker for local registry access
-if [[ "${app_image_uri}" == localhost:5000/* ]]; then
+if [[ "${app_image_uri}" == localhost:5001/* ]]; then
     echo "Configuring Docker for local registry access..."
     # For LocalStack deployment, we need to access the host's local registry
     # This requires additional network configuration in a real deployment
-    echo '{"insecure-registries": ["localhost:5000", "host.docker.internal:5000"]}' > /etc/docker/daemon.json
+    echo '{"insecure-registries": ["localhost:5001", "host.docker.internal:5001"]}' > /etc/docker/daemon.json
     systemctl restart docker
     
     # Wait for Docker to restart

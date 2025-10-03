@@ -32,7 +32,7 @@ error() {
 # Configuration
 if [ "$ENVIRONMENT" = "localstack" ]; then
     AWS_ENDPOINT="--endpoint-url=http://localhost:4566"
-    REGISTRY_URI="localhost:5000/rails-counter-app"  # Use local Docker registry
+    REGISTRY_URI="localhost:5001/rails-counter-app"  # Use local Docker registry
     USE_ECR=false
     TF_VAR_environment="development"
     log "🏠 Deploying to LocalStack environment (using local Docker registry)"
@@ -71,7 +71,7 @@ docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:latest"
 log "📦 Pushing image to registry..."
 if [ "$ENVIRONMENT" = "localstack" ]; then
     # For LocalStack, use local Docker registry (no authentication needed)
-    log "Using local Docker registry at localhost:5000"
+    log "Using local Docker registry at localhost:5001"
     docker push "$REGISTRY_URI:$VERSION"
     docker push "$REGISTRY_URI:latest"
 elif [ "$ENVIRONMENT" = "aws" ] && [ "$USE_ECR" = "true" ]; then

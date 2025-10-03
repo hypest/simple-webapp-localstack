@@ -35,7 +35,7 @@ variable "project_name" {
 variable "app_image_uri" {
   description = "Docker image URI for the Rails application"
   type        = string
-  default     = "localhost:5000/rails-counter-app:latest"
+  default     = "localhost:5001/rails-counter-app:latest"
 }
 
 # Outputs

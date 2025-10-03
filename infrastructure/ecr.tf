@@ -1,5 +1,5 @@
 # ECR is NOT included in LocalStack free tier
-# Instead, we use a local Docker registry running on localhost:5000
+# Instead, we use a local Docker registry running on localhost:5001
 # 
 # The local registry is configured in docker-compose.dev.yml and provides
 # the same functionality for development and testing purposes.
