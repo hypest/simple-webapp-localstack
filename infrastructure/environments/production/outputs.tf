@@ -13,15 +13,7 @@ output "private_subnet_ids" {
   value       = aws_subnet.private[*].id
 }
 
-output "ecr_repository_url" {
-  description = "URL of the ECR repository"
-  value       = aws_ecr_repository.rails_app.repository_url
-}
-
-output "ecr_repository_name" {
-  description = "Name of the ECR repository"
-  value       = aws_ecr_repository.rails_app.name
-}
+// ECR outputs removed for LocalStack Free compatibility. Restore if using real AWS ECR.
 
 # Output from the SQS module
 output "counter_queue_url" {
