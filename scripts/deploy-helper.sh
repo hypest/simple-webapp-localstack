@@ -31,7 +31,7 @@ case "$COMMAND" in
     "build")
         log "🐳 Building application image..."
         cd "$(dirname "$SCRIPT_DIR")"
-        docker build -f Dockerfile.prod -t "rails-counter-app:latest" .
+    docker build -f app-docker-images/Dockerfile.prod -t "rails-counter-app:latest" .
         ;;
     
     "push")

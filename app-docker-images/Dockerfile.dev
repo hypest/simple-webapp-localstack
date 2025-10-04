@@ -19,6 +19,27 @@ WORKDIR /workspace/app
 # Create app directory structure
 RUN mkdir -p /workspace/app/app/controllers /workspace/app/app/models /workspace/app/config /workspace/app/db
 
+# Development Dockerfile for Rails application - Debian-based for devcontainer compatibility
+FROM ruby:3.2-slim
+
+# Install system dependencies
+RUN apt-get update -qq && apt-get install -y \
+  build-essential \
+  nodejs \
+  npm \
+  postgresql-client \
+  sqlite3 \
+  curl \
+  git \
+  && npm install -g yarn \
+  && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /workspace/app
+
+# Create app directory structure
+RUN mkdir -p /workspace/app/app/controllers /workspace/app/app/models /workspace/app/config /workspace/app/db
+
 # Copy application code if it exists
 COPY app/ ./
 
@@ -42,3 +63,4 @@ EXPOSE 3000
 
 # Default command - use bash for development flexibility
 CMD ["/bin/bash"]
+

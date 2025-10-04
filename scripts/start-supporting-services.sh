@@ -28,8 +28,17 @@ start_or_reuse_container() {
 # Start Redis
 start_or_reuse_container "redis" "redis:7-alpine" "--network devcontainer-network -p 6379:6379"
 
-## Start Docker Registry
-start_or_reuse_container "registry" "registry:2" "--network devcontainer-network -p 5001:5000 -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data -v registry_data:/data"
+## Start Docker Registry (standardized to local_registry and volume simple_app_local_registry_data)
+# If registry-bridge.sh already started a registry named 'local_registry' (port 5001), reuse it.
+if docker ps --format '{{.Names}}' | grep -q '^local_registry$'; then
+    echo "✅ local_registry already running (reused)"
+else
+    # Ensure the volume exists with the same name used by registry-bridge.sh
+    docker volume inspect simple_app_local_registry_data >/dev/null 2>&1 || \
+        docker volume create simple_app_local_registry_data >/dev/null
+
+    start_or_reuse_container "local_registry" "registry:2" "--network devcontainer-network -p 5001:5000 -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data -v simple_app_local_registry_data:/data"
+fi
 
 echo "✅ Supporting services started!"
 echo "   - Redis: localhost:6379"

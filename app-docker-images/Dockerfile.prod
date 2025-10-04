@@ -40,10 +40,10 @@ ARG PRECOMPILE=true
 ENV RAILS_ENV=production
 ENV SECRET_KEY_BASE=dummy_secret_for_precompile
 RUN if [ "${PRECOMPILE}" = "true" ]; then \
-      bundle exec rails assets:precompile; \
-    else \
-      echo "Skipping assets:precompile (PRECOMPILE=${PRECOMPILE})"; \
-    fi
+  bundle exec rails assets:precompile; \
+  else \
+  echo "Skipping assets:precompile (PRECOMPILE=${PRECOMPILE})"; \
+  fi
 
 # Create non-root user
 RUN groupadd -r rails && useradd -r -g rails rails

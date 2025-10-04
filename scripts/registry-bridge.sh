@@ -17,38 +17,49 @@ warn() {
 
 case "${1:-help}" in
     "start")
-        log "🚀 Starting LocalStack registry bridge..."
-        
-        # Ensure the registry is running
-        cd "$PROJECT_ROOT"
-        docker-compose -f docker-compose.dev.yml up -d registry
-        
-        # Check registry health
-        for i in {1..30}; do
-            if curl -sf http://localhost:5001/v2/ >/dev/null 2>&1; then
-                log "✅ Local Docker registry is healthy at localhost:5001"
-                break
-            else
-                log "⏳ Waiting for registry to be ready... (attempt $i/30)"
-                sleep 2
-            fi
-        done
-        
-        log "📋 Registry bridge configured. LocalStack EC2 instances can now access:"
-        log "   - localhost:5001 (from host)"
-        log "   - registry:5000 (from within Docker network)"
+        log "🚀 Starting Local Docker registry (registry:2)"
+
+        # Create a persistent volume for registry data if it doesn't exist
+        docker volume inspect simple_app_local_registry_data >/dev/null 2>&1 || \
+            docker volume create simple_app_local_registry_data >/dev/null
+
+        # Run registry if not already running
+        if docker ps --format '{{.Names}}' | grep -q '^local_registry$'; then
+            log "ℹ️  Registry container 'local_registry' already running"
+        else
+            docker run -d --name local_registry \
+                -p 5001:5000 \
+                -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data \
+                -v simple_app_local_registry_data:/data \
+                registry:2 >/dev/null
+
+            # Wait for registry health
+            for i in {1..30}; do
+                if curl -sf http://localhost:5001/v2/ >/dev/null 2>&1; then
+                    log "✅ Local Docker registry is healthy at localhost:5001"
+                    break
+                else
+                    log "⏳ Waiting for registry to be ready... (attempt $i/30)"
+                    sleep 2
+                fi
+            done
+
+            log "📋 Registry bridge configured. LocalStack EC2 instances can now access:"
+            log "   - localhost:5001 (from host)"
+            log "   - registry:5000 (from within Docker network, if used)"
+        fi
         ;;
     
     "status")
         log "📊 Checking registry status..."
-        
+
         if curl -sf http://localhost:5001/v2/ >/dev/null 2>&1; then
             log "✅ Registry is running at localhost:5001"
-            
+
             # List available images
             CATALOG=$(curl -s http://localhost:5001/v2/_catalog 2>/dev/null || echo '{"repositories":[]}')
             REPOS=$(echo "$CATALOG" | grep -o '"repositories":\[[^]]*\]' | sed 's/"repositories":\[//;s/\]$//' | tr -d '"' | tr ',' '\n')
-            
+
             if [ -n "$REPOS" ] && [ "$REPOS" != "" ]; then
                 log "📦 Available images:"
                 echo "$REPOS" | while read -r repo; do
@@ -85,9 +96,10 @@ case "${1:-help}" in
     
     "clean")
         log "🧹 Cleaning up registry data..."
-        cd "$PROJECT_ROOT"
-        docker-compose -f docker-compose.dev.yml down -v
-        docker volume rm simple-app-localstack_registry_data 2>/dev/null || true
+        # Stop and remove registry container if exists
+        docker rm -f local_registry 2>/dev/null || true
+        # Remove the persistent volume
+        docker volume rm simple_app_local_registry_data 2>/dev/null || true
         log "✅ Registry data cleaned"
         ;;
     

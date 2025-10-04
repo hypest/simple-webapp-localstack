@@ -1,5 +1,5 @@
 # Devcontainer Dockerfile based on the official Ruby devcontainer image
-FROM mcr.microsoft.com/devcontainers/ruby:3.2-bookworm
+FROM mcr.microsoft.com/devcontainers/ruby:3.4-bookworm
 
 # Install redis-tools (provides redis-cli) and any other lightweight tools we want in the devcontainer
 RUN apt-get update -qq \

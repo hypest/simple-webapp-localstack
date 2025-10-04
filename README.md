@@ -18,8 +18,7 @@ simple-app-localstack/
 │   └── outputs.tf          # Terraform outputs
 ├── scripts/                # Setup and utility scripts
 │   └── setup.sh            # Development environment setup
-├── docker-compose.dev.yml  # Development services (LocalStack, Redis, Rails)
-├── Dockerfile.dev          # Development container for Rails
+├── app-docker-images/      # Dockerfiles for app images (dev/prod)
 └── README.md               # This file
 ```
 
@@ -161,8 +160,8 @@ aws --endpoint-url=http://localstack:4566 sqs receive-message \
 ### Docker
 
 ```bash
-docker-compose -f docker-compose.dev.yml logs localstack  # LocalStack logs
-docker-compose -f docker-compose.dev.yml logs sidekiq     # Sidekiq logs
+./scripts/start-supporting-services.sh   # starts Redis and registry via docker run
+./scripts/registry-bridge.sh status      # show registry status and list images
 
 ## 🧰 Devcontainer image and developer tooling
 
@@ -190,13 +189,15 @@ devcontainer up --workspace-folder .
 
 ### Quick checks inside the devcontainer
 
-```bash
 which redis-cli jq http
-redis-cli PING      # should return PONG if Redis is reachable
-http --version
-```
+   You can use the helper scripts to manage supporting services (registry and Redis) and the Local Docker registry:
 
-### Supporting services
+   ```bash
+   ./scripts/start-supporting-services.sh   # starts Redis and registry via docker run
+   ./scripts/registry-bridge.sh start       # starts the local registry only (if needed)
+   ./scripts/registry-bridge.sh status      # show registry status and list images
+   ./scripts/registry-bridge.sh clean       # remove registry container & data
+   ```
 
 Use the helper script to start local supporting services (Redis and a local Docker registry):
 
@@ -220,8 +221,10 @@ docker rm -f redis registry || true
 # Check LocalStack health
 curl http://localhost:4566/health
 
-# Restart LocalStack
-docker-compose -f docker-compose.dev.yml restart localstack
+# Restart LocalStack (example using Docker)
+docker restart <localstack-container-name>
+
+# Or if you use the LocalStack CLI or supervisor, restart via that tool
 ```
 
 ### Rails server issues

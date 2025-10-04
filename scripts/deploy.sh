@@ -97,7 +97,7 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
         echo ""
         echo "Please start LocalStack before running deploy. Options:"
         echo "  1) ./scripts/start-localstack.sh        # start LocalStack"
-        echo "  2) Use your preferred LocalStack startup (docker-compose, localstack CLI, etc.)"
+        echo "  2) Use your preferred LocalStack startup method (LocalStack CLI, docker run, etc.)"
         echo ""
         echo "Suggestion: Run './scripts/start-localstack.sh' and re-run './scripts/deploy.sh localstack'"
         exit 1
@@ -112,7 +112,7 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
         warn "Local Docker registry not reachable at http://localhost:5001"
         echo ""
         echo "Please start the local registry before running deploy. Options:" 
-        echo "  1) ./scripts/registry-bridge.sh start    # starts registry via docker-compose"
+    echo "  1) ./scripts/registry-bridge.sh start    # starts local registry via docker run"
         echo "  2) ./scripts/start-supporting-services.sh # starts registry (and redis) via docker run"
         echo ""
         echo "Suggestion: Run './scripts/registry-bridge.sh start' and re-run './scripts/deploy.sh localstack'"
@@ -121,9 +121,9 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
 fi
     log "🐳 Building Docker image..."
     if [ "$ENVIRONMENT" = "localstack" ]; then
-    docker build --progress=plain --build-arg PRECOMPILE=false -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
+    docker build --progress=plain --build-arg PRECOMPILE=false -f app-docker-images/Dockerfile.prod -t "rails-counter-app:$VERSION" .
 else
-    docker build --progress=plain -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
+    docker build --progress=plain -f app-docker-images/Dockerfile.prod -t "rails-counter-app:$VERSION" .
 fi
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:$VERSION"
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:latest"
