@@ -61,9 +61,67 @@ log "🔑 Ensuring SSH keys exist..."
 "$SCRIPT_DIR/generate-keys.sh"
 
 # Step 2: Build and tag the Docker image
-log "🐳 Building Docker image..."
 cd "$PROJECT_ROOT"
 if [ "$ENVIRONMENT" = "localstack" ]; then
+    # Check LocalStack availability before building/pushing
+    LS_CODE=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:4566/health 2>/dev/null || true)
+    if [ -z "$LS_CODE" ]; then
+        LS_CODE="000"
+    fi
+
+    # If HTTP check fails, also check for a listener on port 4566 and active localstack containers
+    LS_LISTENER_OK=false
+    if [ -n "$LS_CODE" ] && [ "$LS_CODE" != "000" ]; then
+        LS_LISTENER_OK=true
+    else
+        # Check for local process listening on :4566
+        if command -v ss >/dev/null 2>&1; then
+            if ss -ltn | awk '{print $4}' | grep -E '(:|\[)::?4566$' >/dev/null 2>&1; then
+                LS_LISTENER_OK=true
+            fi
+        elif command -v lsof >/dev/null 2>&1; then
+            if lsof -iTCP:4566 -sTCP:LISTEN >/dev/null 2>&1; then
+                LS_LISTENER_OK=true
+            fi
+        fi
+
+        # Check if any docker container image/name mentions localstack
+        if [ "$LS_LISTENER_OK" = false ]; then
+            if docker ps -a --format '{{.Names}}\t{{.Image}}' | awk 'BEGIN{IGNORECASE=1} /localstack/ {exit 0} END{exit 1}'; then
+                LS_LISTENER_OK=true
+            fi
+        fi
+    fi
+
+    if [ "$LS_LISTENER_OK" = false ]; then
+        warn "LocalStack is not reachable at http://localhost:4566 and no local listener/container detected"
+        echo ""
+        echo "Please start LocalStack before running deploy. Options:"
+        echo "  1) ./scripts/start-localstack.sh        # start LocalStack"
+        echo "  2) Use your preferred LocalStack startup (docker-compose, localstack CLI, etc.)"
+        echo ""
+        echo "Suggestion: Run './scripts/start-localstack.sh' and re-run './scripts/deploy.sh localstack'"
+        exit 1
+    fi
+
+    # Also check local Docker registry early to avoid wasting a build
+    REG_CODE=$(curl -sS -o /dev/null -w "%{http_code}" http://localhost:5001/v2/ 2>/dev/null || true)
+    if [ -z "$REG_CODE" ]; then
+        REG_CODE="000"
+    fi
+    if [ -z "$REG_CODE" ] || [ "$REG_CODE" = "000" ]; then
+        warn "Local Docker registry not reachable at http://localhost:5001"
+        echo ""
+        echo "Please start the local registry before running deploy. Options:" 
+        echo "  1) ./scripts/registry-bridge.sh start    # starts registry via docker-compose"
+        echo "  2) ./scripts/start-supporting-services.sh # starts registry (and redis) via docker run"
+        echo ""
+        echo "Suggestion: Run './scripts/registry-bridge.sh start' and re-run './scripts/deploy.sh localstack'"
+        exit 1
+    fi
+fi
+    log "🐳 Building Docker image..."
+    if [ "$ENVIRONMENT" = "localstack" ]; then
     docker build --progress=plain --build-arg PRECOMPILE=false -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
 else
     docker build --progress=plain -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
@@ -76,6 +134,8 @@ log "📦 Pushing image to registry..."
 if [ "$ENVIRONMENT" = "localstack" ]; then
     # For LocalStack, use local Docker registry (no authentication needed)
     log "Using local Docker registry at localhost:5001"
+    # Registry health already checked earlier (to fail fast)
+
     docker push "$REGISTRY_URI:$VERSION"
     docker push "$REGISTRY_URI:latest"
 elif [ "$ENVIRONMENT" = "aws" ] && [ "$USE_ECR" = "true" ]; then
