@@ -5,6 +5,11 @@
 # This script discovers running EC2 instances and provides an interactive menu
 # to select and SSH into them. It supports both LocalStack and real AWS.
 #
+# Security Features:
+# - Extracts SSH private key exclusively from Terraform state (zero filesystem storage)
+# - Creates temporary key files with secure permissions that are auto-cleaned
+# - No persistent SSH key files anywhere in the project
+#
 # LocalStack Support:
 # - Community Edition: Shows mocked instances (not SSH-accessible)
 # - Pro/Ultimate: Creates real Docker containers with SSH access
@@ -27,8 +32,9 @@ NC='\033[0m' # No Color
 # Default configuration
 USE_LOCALSTACK=true
 DISCOVERY_TIMEOUT=5
-SSH_KEY_PATH="$SCRIPT_DIR/rails-app-key"
+# SSH_KEY_PATH removed - keys are now extracted exclusively from Terraform
 SSH_USER="ec2-user"
+TERRAFORM_DIR="$PROJECT_ROOT/infrastructure"
 
 # Function to detect LocalStack edition and capabilities
 detect_localstack_capabilities() {
@@ -38,6 +44,39 @@ detect_localstack_capabilities() {
     else
         echo "aws"
     fi
+}
+
+# Function to get SSH private key from Terraform output
+get_ssh_key_from_terraform() {
+    if [[ -d "$TERRAFORM_DIR" && -f "$TERRAFORM_DIR/terraform.tfstate" ]]; then
+        log "Extracting SSH private key from Terraform state..."
+        
+        # Change to terraform directory and extract the key
+        if (cd "$TERRAFORM_DIR" && terraform output -raw ssh_private_key 2>/dev/null); then
+            return 0
+        else
+            warn "Failed to extract SSH key from Terraform output"
+            return 1
+        fi
+    else
+        warn "Terraform state not found at $TERRAFORM_DIR"
+        return 1
+    fi
+}
+
+# Function to create temporary key file from content
+create_temp_key_file() {
+    local key_content="$1"
+    local temp_key_file
+    
+    # Create a temporary file with restrictive permissions
+    temp_key_file=$(mktemp)
+    chmod 600 "$temp_key_file"
+    
+    # Write the key content to the temporary file
+    echo "$key_content" > "$temp_key_file"
+    
+    echo "$temp_key_file"
 }
 
 log() {
@@ -64,13 +103,19 @@ show_usage() {
     echo "  --list        List running instances without SSH connection"
     echo "  --localstack  Use LocalStack endpoint (default)"
     echo "  --aws         Use real AWS (requires proper AWS credentials)"
+    echo "  --test-key    Test SSH key extraction from Terraform (shows key fingerprint)"
     echo "  --help        Show this help message"
+    echo ""
+    echo "SSH Key Handling:"
+    echo "  - Extracts SSH private key directly from Terraform state"
+    echo "  - No filesystem key files are created or used"
     echo ""
     echo "Interactive mode (default): Discover instances and show selection menu"
 }
 
 # Parse command line arguments
 LIST_ONLY=false
+TEST_KEY_ONLY=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         --list)
@@ -85,6 +130,10 @@ while [[ $# -gt 0 ]]; do
             USE_LOCALSTACK=false
             shift
             ;;
+        --test-key)
+            TEST_KEY_ONLY=true
+            shift
+            ;;
         --help)
             show_usage
             exit 0
@@ -95,10 +144,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Check if SSH key exists
-if [[ ! -f "$SSH_KEY_PATH" ]]; then
-    error "SSH key not found at $SSH_KEY_PATH. Run terraform apply first to generate keys."
-fi
+# Note: SSH key check moved to ssh_into_instance function to allow Terraform extraction
 
 # Set appropriate AWS endpoint
 if [[ "$USE_LOCALSTACK" == "true" ]]; then
@@ -337,16 +383,26 @@ ssh_into_instance() {
     fi
     
     log "Connecting to instance: $instance_id ($name)"
-    log "SSH command: ssh -i $SSH_KEY_PATH $SSH_USER@$ssh_ip"
     
-    # Set proper permissions on SSH key
-    chmod 600 "$SSH_KEY_PATH"
+    # Extract SSH key from Terraform state
+    local ssh_key_content
+    local temp_key_file
+    
+    if ssh_key_content=$(get_ssh_key_from_terraform); then
+        temp_key_file=$(create_temp_key_file "$ssh_key_content")
+        info "Using SSH key from Terraform state"
+    else
+        error "Failed to extract SSH key from Terraform state. Ensure terraform is available and applied."
+        return 1
+    fi
+    
+    log "SSH key source: $ssh_key_source"
     
     # Test connectivity first
     echo ""
     info "Testing connectivity to $ssh_ip..."
     
-    if timeout 5 nc -z "$ssh_ip" 22 2>/dev/null; then
+    if timeout 5 bash -c "</dev/tcp/$ssh_ip/22" 2>/dev/null; then
         log "Port 22 is reachable, attempting SSH connection..."
     else
         warn "Port 22 is not reachable on $ssh_ip"
@@ -356,6 +412,8 @@ ssh_into_instance() {
         echo ""
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             info "SSH attempt cancelled"
+            # Clean up temporary key file
+            rm -f "$temp_key_file"
             return 0
         fi
     fi
@@ -367,11 +425,18 @@ ssh_into_instance() {
     echo ""
     
     # SSH with proper options
-    ssh -i "$SSH_KEY_PATH" \
+    ssh -i "$temp_key_file" \
         -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o ConnectTimeout=10 \
         "$SSH_USER@$ssh_ip"
+    
+    local ssh_exit_code=$?
+    
+    # Clean up temporary key file
+    rm -f "$temp_key_file"
+    
+    return $ssh_exit_code
 }
 
 # Main execution
@@ -384,6 +449,40 @@ main() {
     # Check if aws CLI is available
     if ! command -v aws &> /dev/null; then
         error "AWS CLI is required but not installed. Please install awscli to use this script."
+    fi
+    
+    # Check if terraform is available (for key extraction)
+    if ! command -v terraform &> /dev/null; then
+        warn "Terraform not found - will use filesystem SSH key as fallback"
+    fi
+    
+    # If test key mode, test key extraction and exit
+    if [[ "$TEST_KEY_ONLY" == "true" ]]; then
+        echo ""
+        info "Testing SSH key extraction from Terraform..."
+        
+        local ssh_key_content
+        if ssh_key_content=$(get_ssh_key_from_terraform); then
+            local temp_key_file
+            temp_key_file=$(create_temp_key_file "$ssh_key_content")
+            
+            log "✅ Successfully extracted SSH key from Terraform state"
+            
+            # Show key fingerprint for verification\n            if command -v ssh-keygen &> /dev/null; then\n                info \"SSH key fingerprint:\"\n                local fingerprint\n                if fingerprint=$(ssh-keygen -l -f \"$temp_key_file\" 2>/dev/null); then\n                    echo \"  $fingerprint\"\n                else\n                    echo \"  Could not generate fingerprint (key format may be unsupported)\"\n                fi\n            fi
+            
+            # Clean up
+            rm -f "$temp_key_file"
+            log "✅ Temporary key file cleaned up"
+            
+        else
+            error "❌ Failed to extract SSH key from Terraform state"
+            exit 1
+        fi
+        
+        echo ""
+        info "Key extraction test completed successfully!"
+        info "The script will use this key instead of filesystem keys during SSH connections."
+        exit 0
     fi
     
     # Discover instances

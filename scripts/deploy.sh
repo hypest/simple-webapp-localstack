@@ -56,9 +56,8 @@ else
     error "Invalid environment. Use 'localstack' or 'aws'"
 fi
 
-# Step 1: Generate SSH keys if needed
-log "🔑 Ensuring SSH keys exist..."
-"$SCRIPT_DIR/generate-keys.sh"
+# SSH keys are now managed entirely by Terraform (no filesystem keys needed)
+log "🔑 SSH keys managed by Terraform (no filesystem generation needed)..."
 
 # Step 2: Build and tag the Docker image
 cd "$PROJECT_ROOT"

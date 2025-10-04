@@ -68,9 +68,8 @@ cd "$WORKSPACE_ROOT/infrastructure"
 # Initialize Terraform
 terraform init
 
-# Generate SSH keys for EC2 access
-echo "🔑 Generating SSH keys for EC2 access..."
-bash "$WORKSPACE_ROOT/scripts/generate-keys.sh"
+# SSH keys are now managed entirely by Terraform (no filesystem keys needed)
+echo "🔑 SSH keys will be managed by Terraform (no filesystem keys created)..."
 
 # Start supporting services (Redis, Registry)
 echo "🔧 Starting supporting services..."
@@ -85,11 +84,8 @@ echo "🔧 Applying Terraform configuration..."
 terraform plan
 terraform apply -auto-approve
 
-# Extract SSH private key for local use
-echo "🔑 Extracting SSH private key for local access..."
-terraform output -raw ssh_private_key > "$WORKSPACE_ROOT/scripts/rails-app-key"
-chmod 600 "$WORKSPACE_ROOT/scripts/rails-app-key"
-echo "✅ SSH private key saved to scripts/rails-app-key"
+# SSH keys are now extracted dynamically by ssh-into-instance.sh script
+echo "✅ SSH keys managed by Terraform - use './scripts/ssh-into-instance.sh' to connect to instances"
 
 echo "✅ Setup complete!"
 echo ""

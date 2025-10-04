@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-# Generate SSH key pair for EC2 access if it doesn't exist
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-KEY_PATH="$SCRIPT_DIR/rails-app-key"
+# DEPRECATED: This script is no longer needed
+# SSH keys are now managed entirely by Terraform and extracted dynamically
+# by the ssh-into-instance.sh script. No filesystem keys are created.
 
-if [ ! -f "${KEY_PATH}" ]; then
-    echo "🔑 Generating SSH key pair for EC2 access..."
-    ssh-keygen -t rsa -b 4096 -f "${KEY_PATH}" -N "" -C "rails-app-ec2-key"
-    chmod 600 "${KEY_PATH}"
-    chmod 644 "${KEY_PATH}.pub"
-    echo "✅ SSH key pair generated at ${KEY_PATH}"
-else
-    echo "✅ SSH key pair already exists"
-fi
+echo "ℹ️  This script is deprecated."
+echo "📋 SSH keys are now managed by Terraform:"
+echo "   - Terraform generates and stores keys in state"
+echo "   - ssh-into-instance.sh extracts keys dynamically"
+echo "   - No filesystem key files are created"
+echo ""
+echo "🚀 To connect to instances, use: ./scripts/ssh-into-instance.sh"
+echo ""
+echo "✅ No action needed - SSH key management is fully automated"

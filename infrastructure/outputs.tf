@@ -25,7 +25,7 @@ output "local_registry_url" {
 
 # SSH key outputs (marked as sensitive)
 output "ssh_private_key" {
-  description = "Private SSH key for EC2 access (save this to connect to instances)"
+  description = "Private SSH key for EC2 access (extracted dynamically by ssh-into-instance.sh)"
   value       = tls_private_key.rails_app.private_key_pem
   sensitive   = true
 }
