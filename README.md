@@ -163,6 +163,53 @@ aws --endpoint-url=http://localstack:4566 sqs receive-message \
 ```bash
 docker-compose -f docker-compose.dev.yml logs localstack  # LocalStack logs
 docker-compose -f docker-compose.dev.yml logs sidekiq     # Sidekiq logs
+
+## 🧰 Devcontainer image and developer tooling
+
+This repository now builds the devcontainer from a Dockerfile (`.devcontainer/Dockerfile`) so we can bake developer tools into the image.
+
+- Tools installed in the devcontainer image:
+   - `redis-cli` (provided by `redis-tools`) — quick Redis checks and troubleshooting
+   - `jq` — JSON CLI processor
+   - `http` (HTTPie) — friendlier HTTP client than curl for quick API calls
+
+### Rebuild the devcontainer
+
+After pulling the repo changes you'll need to rebuild the devcontainer so the new Dockerfile is used. In VS Code:
+
+1. Open the Command Palette (Ctrl/Cmd+Shift+P)
+2. Select `Dev Containers: Rebuild and Reopen in Container`
+
+Or using the Dev Container CLI:
+
+```bash
+npm i -g @devcontainers/cli
+devcontainer build --workspace-folder . --file .devcontainer/Dockerfile
+devcontainer up --workspace-folder .
+```
+
+### Quick checks inside the devcontainer
+
+```bash
+which redis-cli jq http
+redis-cli PING      # should return PONG if Redis is reachable
+http --version
+```
+
+### Supporting services
+
+Use the helper script to start local supporting services (Redis and a local Docker registry):
+
+```bash
+./scripts/start-supporting-services.sh
+```
+
+If you need to stop/remove them:
+
+```bash
+docker rm -f redis registry || true
+```
+
 ```
 
 ## 🐛 Troubleshooting
