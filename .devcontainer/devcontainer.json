@@ -1,7 +1,9 @@
 {
   "name": "Rails + AWS + LocalStack Development",
   "image": "mcr.microsoft.com/devcontainers/ruby:3.2-bookworm",
-  
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway"
+  ],
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "moby": false,
@@ -44,7 +46,7 @@
         "ruby.intellisense": "rubyLocate",
         "ruby.codeCompletion": "rcodetools",
         "aws.telemetry": false,
-                "localstack.endpoint": "http://localhost:4566",
+        "localstack.endpoint": "http://host.docker.internal:4566",
         "docker.defaultPlatform": "linux/amd64"
       }
     }
