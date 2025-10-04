@@ -44,10 +44,16 @@ resource "aws_security_group" "rails_app" {
   }
 }
 
+# Generate SSH key pair using Terraform
+resource "tls_private_key" "rails_app" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 # Key pair for EC2 access
 resource "aws_key_pair" "rails_app" {
   key_name   = "rails-app-key"
-  public_key = file("../scripts/rails-app-key.pub")
+  public_key = tls_private_key.rails_app.public_key_openssh
 
   tags = {
     Environment = "development"

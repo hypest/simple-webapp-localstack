@@ -35,3 +35,15 @@ output "local_registry_url" {
   description = "URL of the local Docker registry (for LocalStack)"
   value       = "localhost:5001"
 }
+
+# SSH key outputs (marked as sensitive)
+output "ssh_private_key" {
+  description = "Private SSH key for EC2 access (save this to connect to instances)"
+  value       = tls_private_key.rails_app.private_key_pem
+  sensitive   = true
+}
+
+output "ssh_public_key" {
+  description = "Public SSH key for EC2 access"
+  value       = tls_private_key.rails_app.public_key_openssh
+}

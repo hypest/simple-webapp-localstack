@@ -85,6 +85,12 @@ echo "🔧 Applying Terraform configuration..."
 terraform plan
 terraform apply -auto-approve
 
+# Extract SSH private key for local use
+echo "🔑 Extracting SSH private key for local access..."
+terraform output -raw ssh_private_key > "$WORKSPACE_ROOT/scripts/rails-app-key"
+chmod 600 "$WORKSPACE_ROOT/scripts/rails-app-key"
+echo "✅ SSH private key saved to scripts/rails-app-key"
+
 echo "✅ Setup complete!"
 echo ""
 echo "📋 Next steps:"
