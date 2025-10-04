@@ -1,5 +1,5 @@
 # Development Dockerfile for Rails application - Debian-based for devcontainer compatibility
-FROM ruby:3.2-slim
+FROM mcr.microsoft.com/devcontainers/ruby:3.4-bookworm
 
 # Install system dependencies
 RUN apt-get update -qq && apt-get install -y \

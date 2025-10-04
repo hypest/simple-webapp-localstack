@@ -2,25 +2,26 @@ require_relative "boot"
 
 require "rails/all"
 
+# Require the gems listed in Gemfile, including any gems
+# you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module SimpleCounterApp
+module Rails8
   class Application < Rails::Application
-    config.load_defaults 7.0
+    # Initialize configuration defaults for originally generated Rails version.
+    config.load_defaults 8.0
 
-    # Configuration for the application
-    config.active_job.queue_adapter = :sidekiq
-    
-    # AWS Configuration
-    config.aws_region = ENV.fetch("AWS_DEFAULT_REGION", "us-east-1")
-    config.localstack_endpoint = ENV.fetch("LOCALSTACK_ENDPOINT", "http://localhost:4566")
-    
-    # SQS Configuration
-    config.counter_queue_url = ENV.fetch("COUNTER_QUEUE_URL", "http://localhost:4566/000000000000/counter-queue")
-    
-    # Allow connections from devcontainer and LocalStack
-    config.hosts << "rails-dev"
-    config.hosts << /.*\.localstack\.cloud/
-    config.hosts << /.*\.localhost/
+    # Please, add to the `ignore` list any other `lib` subdirectories that do
+    # not contain `.rb` files, or that should not be reloaded or eager loaded.
+    # Common ones are `templates`, `generators`, or `middleware`, for example.
+    config.autoload_lib(ignore: %w[assets tasks])
+
+    # Configuration for the application, engines, and railties goes here.
+    #
+    # These settings can be overridden in specific environments using the files
+    # in config/environments, which are processed later.
+    #
+    # config.time_zone = "Central Time (US & Canada)"
+    # config.eager_load_paths << Rails.root.join("extras")
   end
 end
