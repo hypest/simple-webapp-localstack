@@ -68,6 +68,10 @@ cd "$WORKSPACE_ROOT/infrastructure"
 # Initialize Terraform
 terraform init
 
+# Generate SSH keys for EC2 access
+echo "🔑 Generating SSH keys for EC2 access..."
+bash "$WORKSPACE_ROOT/scripts/generate-keys.sh"
+
 # Start supporting services (Redis, Registry)
 echo "🔧 Starting supporting services..."
 bash "$WORKSPACE_ROOT/scripts/start-supporting-services.sh"

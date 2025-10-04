@@ -16,8 +16,11 @@ provider "aws" {
   skip_requesting_account_id  = true
 
   endpoints {
-    sqs = "http://localstack:4566"
-    ec2 = "http://localstack:4566"
-    iam = "http://localstack:4566"
+    sqs                  = "http://localhost:4566"
+    ec2                  = "http://localhost:4566"
+    iam                  = "http://localhost:4566"
+    autoscaling          = "http://localhost:4566"
+    elbv2                = "http://localhost:4566"
+    elasticloadbalancing = "http://localhost:4566"
   }
 }

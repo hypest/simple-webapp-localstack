@@ -2,7 +2,8 @@
 set -e
 
 # Generate SSH key pair for EC2 access if it doesn't exist
-KEY_PATH="/workspace/scripts/rails-app-key"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KEY_PATH="$SCRIPT_DIR/rails-app-key"
 
 if [ ! -f "${KEY_PATH}" ]; then
     echo "🔑 Generating SSH key pair for EC2 access..."

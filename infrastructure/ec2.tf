@@ -47,7 +47,7 @@ resource "aws_security_group" "rails_app" {
 # Key pair for EC2 access
 resource "aws_key_pair" "rails_app" {
   key_name   = "rails-app-key"
-  public_key = file("${path.module}/../scripts/rails-app-key.pub")
+  public_key = file("../scripts/rails-app-key.pub")
 
   tags = {
     Environment = "development"
@@ -67,7 +67,7 @@ resource "aws_launch_template" "rails_app" {
   user_data = base64encode(templatefile("${path.module}/user-data.sh", {
     counter_queue_url   = aws_sqs_queue.counter_queue.url
     region              = "us-east-1"
-    localstack_endpoint = "http://localstack:4566"
+    localstack_endpoint = "http://localhost:4566"
     app_image_uri       = var.app_image_uri
   }))
 
@@ -161,7 +161,12 @@ resource "aws_lb_listener" "rails_app" {
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.rails_app.arn
+    type = "forward"
+
+    forward {
+      target_group {
+        arn = aws_lb_target_group.rails_app.arn
+      }
+    }
   }
 }
