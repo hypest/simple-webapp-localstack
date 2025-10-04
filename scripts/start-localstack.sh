@@ -14,6 +14,9 @@ for arg in "$@"; do
     esac
 done
 
+# Container name constant for easier maintenance
+CONTAINER_NAME="localstack-main"
+
 echo "Starting LocalStack using Docker-in-Docker..."
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,21 +24,21 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 LOCALSTACK_DIR="$PROJECT_ROOT/.localstack"
 
 # If already running, exit
-if docker ps -q -f name=localstack >/dev/null 2>&1 && [ -n "$(docker ps -q -f name=localstack)" ]; then
+if docker ps -q -f name="$CONTAINER_NAME" >/dev/null 2>&1 && [ -n "$(docker ps -q -f name="$CONTAINER_NAME")" ]; then
     echo "LocalStack is already running"
     exit 0
 fi
 
 # If the user requested removal, force remove any existing container
-if [ "$REMOVE" = true ] && docker ps -aq -f name=localstack >/dev/null 2>&1 && [ -n "$(docker ps -aq -f name=localstack)" ]; then
+if [ "$REMOVE" = true ] && docker ps -aq -f name="$CONTAINER_NAME" >/dev/null 2>&1 && [ -n "$(docker ps -aq -f name="$CONTAINER_NAME")" ]; then
     echo "Forcing removal of existing LocalStack container..."
-    docker rm -f localstack >/dev/null 2>&1 || true
+    docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 fi
 
 # Remove stopped container if present (best-effort)
-if docker ps -aq -f name=localstack >/dev/null 2>&1 && [ -n "$(docker ps -aq -f name=localstack)" ]; then
+if docker ps -aq -f name="$CONTAINER_NAME" >/dev/null 2>&1 && [ -n "$(docker ps -aq -f name="$CONTAINER_NAME")" ]; then
     echo "Removing existing LocalStack container..."
-    docker rm localstack >/dev/null 2>&1 || true
+    docker rm "$CONTAINER_NAME" >/dev/null 2>&1 || true
 fi
 
 # Use a project-local directory to avoid system /tmp mount issues
@@ -45,7 +48,7 @@ chmod 0777 "$LOCALSTACK_DIR" || true
 echo "Starting LocalStack container..."
 
 # Decide whether to mount a host directory for persistence
-DOCKER_RUN_CMD=(docker run -d --name localstack -p 4566:4566)
+DOCKER_RUN_CMD=(docker run -d --name "$CONTAINER_NAME" -p 4566:4566)
 DOCKER_RUN_CMD+=( -e SERVICES=sqs,ec2,iam,autoscaling,elbv2,ecr,logs )
 DOCKER_RUN_CMD+=( -e DEBUG=1 )
 DOCKER_RUN_CMD+=( -e DOCKER_HOST=unix:///var/run/docker.sock )
@@ -73,9 +76,9 @@ timeout=120
 counter=0
 while true; do
     # If the container exited, show logs and fail
-    if [ "$(docker inspect -f '{{.State.Running}}' localstack 2>/dev/null || echo false)" != "true" ]; then
+    if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null || echo false)" != "true" ]; then
         echo "LocalStack container is not running. Showing recent logs to help diagnose:"
-        docker logs localstack --tail 200 || true
+        docker logs "$CONTAINER_NAME" --tail 200 || true
         exit 1
     fi
 
@@ -88,7 +91,7 @@ while true; do
     if [ $counter -ge $timeout ]; then
         echo "LocalStack failed to start within $timeout seconds"
         echo "Recent logs from the container:"
-        docker logs localstack --tail 200 || true
+        docker logs "$CONTAINER_NAME" --tail 200 || true
         exit 1
     fi
 
