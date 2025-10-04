@@ -63,7 +63,11 @@ log "🔑 Ensuring SSH keys exist..."
 # Step 2: Build and tag the Docker image
 log "🐳 Building Docker image..."
 cd "$PROJECT_ROOT"
-docker build -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
+if [ "$ENVIRONMENT" = "localstack" ]; then
+    docker build --progress=plain --build-arg PRECOMPILE=false -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
+else
+    docker build --progress=plain -f Dockerfile.prod -t "rails-counter-app:$VERSION" .
+fi
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:$VERSION"
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:latest"
 
