@@ -191,8 +191,8 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
     # produce a load balancer DNS (it will be "N/A"), fall back to the local
     # host port where the application's Docker compose exposes the app.
     if [ -z "$LOAD_BALANCER_DNS" ] || [ "$LOAD_BALANCER_DNS" = "N/A" ]; then
-        warn "Load balancer DNS not found in Terraform outputs; falling back to localhost:3000 for health checks"
-    HEALTH_URL="http://localhost:3000/up"
+    warn "Load balancer DNS not found in Terraform outputs; falling back to localhost:8080 for health checks"
+    HEALTH_URL="http://localhost:8080/up"
     else
         HEALTH_URL="http://localhost/$LOAD_BALANCER_DNS/up"
     fi

@@ -70,7 +70,7 @@ services:
   rails:
     image: ${app_image_uri}
     ports:
-      - "3000:3000"
+      - "8080:80"
     env_file:
       - .env
     volumes:
@@ -79,7 +79,7 @@ services:
     depends_on:
       - redis
     restart: unless-stopped
-    command: ["sh", "-c", "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0"]
+  command: ["sh", "-c", "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 80"]
 
   sidekiq:
     image: ${app_image_uri}
@@ -107,7 +107,7 @@ yum install -y awscli
 cat > /opt/rails-app/health-check.sh << 'EOF'
 #!/bin/bash
 # Simple health check script
-curl -f http://localhost:3000/up || exit 1
+curl -f http://localhost:8080/up || exit 1
 EOF
 
 chmod +x /opt/rails-app/health-check.sh
