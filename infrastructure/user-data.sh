@@ -33,6 +33,15 @@ DATABASE_URL=sqlite3:///opt/rails-app/db/production.sqlite3
 REDIS_URL=redis://localhost:6379/0
 EOF
 
+# Ensure SECRET_KEY_BASE exists for production runtime (LocalStack / test deployments)
+if [ -z "$${SECRET_KEY_BASE}" ]; then
+  # Generate a 64-byte hex secret if not provided
+  GENERATED_SECRET=$(openssl rand -hex 64 2>/dev/null || python3 -c "import os,sys; sys.stdout.write(os.urandom(64).hex())")
+  echo "SECRET_KEY_BASE=$${GENERATED_SECRET}" >> /opt/rails-app/.env
+else
+  echo "SECRET_KEY_BASE=$${SECRET_KEY_BASE}" >> /opt/rails-app/.env
+fi
+
 # Check if we need to configure Docker for local registry access
 if [[ "${app_image_uri}" == localhost:5001/* ]]; then
     echo "Configuring Docker for local registry access..."
@@ -98,7 +107,7 @@ yum install -y awscli
 cat > /opt/rails-app/health-check.sh << 'EOF'
 #!/bin/bash
 # Simple health check script
-curl -f http://localhost:3000/health || exit 1
+curl -f http://localhost:3000/up || exit 1
 EOF
 
 chmod +x /opt/rails-app/health-check.sh

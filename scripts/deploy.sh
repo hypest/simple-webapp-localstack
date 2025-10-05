@@ -187,10 +187,20 @@ fi
 # Step 7: Health check
 log "🏥 Performing health check..."
 if [ "$ENVIRONMENT" = "localstack" ]; then
-    HEALTH_URL="http://localhost/$LOAD_BALANCER_DNS/health"
+    # LocalStack deployments may not create a load balancer. If Terraform didn't
+    # produce a load balancer DNS (it will be "N/A"), fall back to the local
+    # host port where the application's Docker compose exposes the app.
+    if [ -z "$LOAD_BALANCER_DNS" ] || [ "$LOAD_BALANCER_DNS" = "N/A" ]; then
+        warn "Load balancer DNS not found in Terraform outputs; falling back to localhost:3000 for health checks"
+    HEALTH_URL="http://localhost:3000/up"
+    else
+        HEALTH_URL="http://localhost/$LOAD_BALANCER_DNS/up"
+    fi
 elif [ "$ENVIRONMENT" = "aws" ]; then
     HEALTH_URL="http://$LOAD_BALANCER_DNS/health"
 fi
+
+log "Healthcheck URL: $HEALTH_URL"
 
 # Wait for deployment to be ready
 for i in {1..30}; do
