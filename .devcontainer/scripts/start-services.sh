@@ -4,7 +4,8 @@ set -euo pipefail
 echo "Starting runtime services for development (supporting services + LocalStack)"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
+# script now lives in .devcontainer/scripts, repo root is two levels up
+WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Start supporting services (reuse existing script if present)
 if [ -f "$WORKSPACE_ROOT/scripts/start-supporting-services.sh" ]; then

@@ -4,7 +4,8 @@ set -euo pipefail
 echo "Running one-time setup tasks..."
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
+# script now lives in .devcontainer/scripts, repo root is two levels up
+WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 echo "Workspace root: $WORKSPACE_ROOT"
 
@@ -75,6 +76,13 @@ fi
 if [ -d "$WORKSPACE_ROOT/infrastructure" ]; then
   echo "Initializing Terraform in infrastructure/"
   cd "$WORKSPACE_ROOT/infrastructure"
+  # Ensure LocalStack/supporting services are running so terraform can reach the AWS endpoint
+  if [ -f "$SCRIPT_DIR/start-services.sh" ]; then
+    echo "Starting LocalStack and supporting services so Terraform can reach the AWS endpoint..."
+    bash "$SCRIPT_DIR/start-services.sh" || echo "start-services.sh returned non-zero; Terraform may still fail if endpoint is unreachable"
+  else
+    echo "No $SCRIPT_DIR/start-services.sh found; ensure LocalStack is running before terraform plan"
+  fi
   if command -v terraform >/dev/null 2>&1; then
     terraform init -input=false || echo "terraform init failed"
     terraform plan -input=false || echo "terraform plan failed"
