@@ -34,12 +34,17 @@ REDIS_URL=redis://localhost:6379/0
 EOF
 
 # Ensure SECRET_KEY_BASE exists for production runtime (LocalStack / test deployments)
-if [ -z "$${SECRET_KEY_BASE}" ]; then
-  # Generate a 64-byte hex secret if not provided
-  GENERATED_SECRET=$(openssl rand -hex 64 2>/dev/null || python3 -c "import os,sys; sys.stdout.write(os.urandom(64).hex())")
-  echo "SECRET_KEY_BASE=$${GENERATED_SECRET}" >> /opt/rails-app/.env
+if [ -n "${secret_key_base}" ] && [ "${secret_key_base}" != "" ]; then
+  # Use the secret provided by Terraform (note: sensitive and may be in state)
+  echo "SECRET_KEY_BASE=${secret_key_base}" >> /opt/rails-app/.env
 else
-  echo "SECRET_KEY_BASE=$${SECRET_KEY_BASE}" >> /opt/rails-app/.env
+  if [ -z "$${SECRET_KEY_BASE}" ]; then
+    # Generate a 64-byte hex secret if not provided at runtime
+    GENERATED_SECRET=$(openssl rand -hex 64 2>/dev/null || python3 -c "import os,sys; sys.stdout.write(os.urandom(64).hex())")
+    echo "SECRET_KEY_BASE=$${GENERATED_SECRET}" >> /opt/rails-app/.env
+  else
+    echo "SECRET_KEY_BASE=$${SECRET_KEY_BASE}" >> /opt/rails-app/.env
+  fi
 fi
 
 # Check if we need to configure Docker for local registry access
@@ -79,7 +84,7 @@ services:
     depends_on:
       - redis
     restart: unless-stopped
-  command: ["sh", "-c", "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 80"]
+    command: ["sh", "-c", "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 80"]
 
   sidekiq:
     image: ${app_image_uri}

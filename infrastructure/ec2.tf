@@ -74,6 +74,7 @@ resource "aws_instance" "rails_app" {
     region              = "us-east-1"
     localstack_endpoint = "http://localhost:4566"
     app_image_uri       = var.app_image_uri
+    secret_key_base     = var.secret_key_base
   })
 
   tags = {

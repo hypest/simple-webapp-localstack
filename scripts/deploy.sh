@@ -6,6 +6,20 @@ set -e
 
 ENVIRONMENT=${1:-localstack}
 VERSION=${2:-latest}
+# By default, start the app locally for LocalStack deployments so health checks
+# succeed (this restores the previous behavior). Pass --no-start-local as the
+# third arg to disable.
+if [ "$ENVIRONMENT" = "localstack" ]; then
+    START_LOCAL=true
+else
+    START_LOCAL=false
+fi
+# CLI overrides (explicit args win)
+if [ "${3:-}" = "--no-start-local" ]; then
+    START_LOCAL=false
+elif [ "${3:-}" = "--start-local" ]; then
+    START_LOCAL=true
+fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
@@ -162,6 +176,16 @@ cd "$PROJECT_ROOT/infrastructure"
 # Set Terraform variables
 export TF_VAR_app_image_uri="$REGISTRY_URI:$VERSION"
 export TF_VAR_environment="$TF_VAR_environment"
+# Provide SECRET_KEY_BASE for LocalStack deployments if not already provided.
+if [ "$ENVIRONMENT" = "localstack" ]; then
+    if [ -z "${TF_VAR_secret_key_base:-}" ]; then
+        GENERATED_SECRET=$(openssl rand -hex 64 2>/dev/null || python3 -c "import os,sys; sys.stdout.write(os.urandom(64).hex())")
+        export TF_VAR_secret_key_base="$GENERATED_SECRET"
+        warn "No TF_VAR_secret_key_base provided — generating one and exporting as TF_VAR_secret_key_base.\nNote: this will appear in Terraform state and is not secure for production. Use a secrets manager for production deployments."
+    else
+        log "Using TF_VAR_secret_key_base from environment"
+    fi
+fi
 
 # Initialize and apply Terraform
 terraform init
@@ -184,6 +208,27 @@ if [ "$ASG_NAME" != "N/A" ]; then
         }' || warn "Instance refresh failed - instances may need manual update"
 fi
 
+# If requested, start the app locally (useful for LocalStack dev where ec2 user-data won't run)
+if [ "$ENVIRONMENT" = "localstack" ] && [ "$START_LOCAL" = "true" ]; then
+    log "🚀 Starting application locally for LocalStack testing..."
+    CONTAINER_NAME="rails-local-deploy"
+    # stop any existing container with that name
+    if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+        docker stop "$CONTAINER_NAME" || true
+        docker rm "$CONTAINER_NAME" || true
+    fi
+
+    # Ensure we have a secret
+    if [ -z "$TF_VAR_secret_key_base" ]; then
+        TF_VAR_secret_key_base=$(openssl rand -hex 64 2>/dev/null || python3 -c "import os,sys; sys.stdout.write(os.urandom(64).hex())")
+        export TF_VAR_secret_key_base
+    fi
+
+    # Run the container mapping host 8080 to container 80
+    docker run -d --name "$CONTAINER_NAME" -p 8080:80 -e RAILS_ENV=production -e SECRET_KEY_BASE="$TF_VAR_secret_key_base" "$REGISTRY_URI:$VERSION" \
+        sh -c "bundle exec rails db:prepare && bundle exec rails server -b 0.0.0.0 -p 80" || warn "Failed to start local container"
+fi
+
 # Step 7: Health check
 log "🏥 Performing health check..."
 if [ "$ENVIRONMENT" = "localstack" ]; then
@@ -191,10 +236,10 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
     # produce a load balancer DNS (it will be "N/A"), fall back to the local
     # host port where the application's Docker compose exposes the app.
     if [ -z "$LOAD_BALANCER_DNS" ] || [ "$LOAD_BALANCER_DNS" = "N/A" ]; then
-    warn "Load balancer DNS not found in Terraform outputs; falling back to localhost:8080 for health checks"
-    HEALTH_URL="http://localhost:8080/up"
+        warn "Load balancer DNS not found in Terraform outputs; falling back to localhost:8080 for health checks"
+        HEALTH_URL="http://localhost:8080/up"
     else
-        HEALTH_URL="http://localhost/$LOAD_BALANCER_DNS/up"
+        HEALTH_URL="http://$LOAD_BALANCER_DNS/up"
     fi
 elif [ "$ENVIRONMENT" = "aws" ]; then
     HEALTH_URL="http://$LOAD_BALANCER_DNS/health"
