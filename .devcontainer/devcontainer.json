@@ -71,7 +71,7 @@
       "onAutoForward": "silent"
     }
   },
-  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh && bash .devcontainer/scripts/one-time-setup.sh",
   "remoteEnv": {
     "AWS_DEFAULT_REGION": "us-east-1",
     "AWS_ACCESS_KEY_ID": "test",
@@ -82,5 +82,5 @@
     "REDIS_URL": "redis://localhost:6379/0",
     "COUNTER_QUEUE_URL": "http://localhost:4566/000000000000/counter-queue"
   },
-  "postStartCommand": "bash -c 'cd /workspaces/* 2>/dev/null || cd /workspace 2>/dev/null; pwd; bash scripts/setup.sh'"
+  "postStartCommand": "bash -c 'cd /workspaces/* 2>/dev/null || cd /workspace 2>/dev/null; pwd; bash .devcontainer/scripts/start-services.sh'"
 }
