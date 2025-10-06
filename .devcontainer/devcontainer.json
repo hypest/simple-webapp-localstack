@@ -1,8 +1,6 @@
 {
   "name": "Rails + AWS + LocalStack Development",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  "image": "my-devcontainer:local",
   "runArgs": [
     "--add-host=host.docker.internal:host-gateway"
   ],
