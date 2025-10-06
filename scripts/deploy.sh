@@ -134,11 +134,20 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
     fi
 fi
     log "🐳 Building Docker image..."
+    # Prefer interactive BuildKit progress when running in a TTY, fall back to plain for CI/non-TTY
+    if [ -t 1 ]; then
+        PROGRESS_MODE=tty
+    else
+        PROGRESS_MODE=plain
+    fi
+    # Enable BuildKit by default for nicer output/progress control
+    export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
+
     if [ "$ENVIRONMENT" = "localstack" ]; then
-    docker build --progress=plain --build-arg PRECOMPILE=false -f app-docker-images/Dockerfile.prod -t "rails-counter-app:$VERSION" .
-else
-    docker build --progress=plain -f app-docker-images/Dockerfile.prod -t "rails-counter-app:$VERSION" .
-fi
+        docker build --progress="$PROGRESS_MODE" --build-arg PRECOMPILE=false -f app-docker-images/Dockerfile.prod -t "rails-counter-app:$VERSION" .
+    else
+        docker build --progress="$PROGRESS_MODE" -f app-docker-images/Dockerfile.prod -t "rails-counter-app:$VERSION" .
+    fi
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:$VERSION"
 docker tag "rails-counter-app:$VERSION" "$REGISTRY_URI:latest"
 
