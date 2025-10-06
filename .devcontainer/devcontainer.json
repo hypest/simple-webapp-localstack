@@ -24,10 +24,6 @@
       "installZsh": true,
       "installOhMyZsh": true,
       "upgradePackages": true
-    },
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "latest",
-      "installTools": true
     }
   },
   "customizations": {
