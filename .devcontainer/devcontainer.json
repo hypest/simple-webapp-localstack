@@ -1,7 +1,7 @@
 {
   "name": "Rails + AWS + LocalStack Development",
   "build": {
-    "dockerfile": ".devcontainer/Dockerfile",
+    "dockerfile": "./Dockerfile",
     "context": ".."
   },
   "runArgs": [
