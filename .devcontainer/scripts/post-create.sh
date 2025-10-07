@@ -8,16 +8,38 @@ set -euo pipefail
 
 echo "Running devcontainer post-create script"
 
-# --- install awscli-local (pip) ---
-if command -v pip >/dev/null 2>&1; then
-  if ! pip show awscli-local >/dev/null 2>&1; then
-    echo "Installing awscli-local via pip..."
-    pip install awscli-local
+# --- install awscli-local (prefer pipx, fallback to a per-user venv) ---
+echo "Ensuring awscli-local (awslocal) is available"
+if command -v pipx >/dev/null 2>&1; then
+  # Prefer pipx to install user-level CLI tools in isolated venvs
+  if ! pipx list 2>/dev/null | grep -q "awscli-local"; then
+    echo "Installing awscli-local via pipx..."
+    pipx install awscli-local || true
   else
-    echo "awscli-local already installed"
+    echo "awscli-local already installed via pipx"
+  fi
+elif command -v python3 >/dev/null 2>&1; then
+  # Fall back to creating a small per-user virtualenv and symlinking the awslocal binary
+  PYTHON=$(command -v python3)
+  VENV_DIR="$HOME/.local/awscli-local-venv"
+  if [ ! -x "$VENV_DIR/bin/awslocal" ]; then
+    echo "Creating venv at $VENV_DIR and installing awscli-local..."
+    mkdir -p "$(dirname "$VENV_DIR")"
+    "$PYTHON" -m venv "$VENV_DIR"
+    "$VENV_DIR/bin/pip" install --upgrade pip setuptools wheel >/dev/null
+    "$VENV_DIR/bin/pip" install awscli-local >/dev/null
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$VENV_DIR/bin/awslocal" "$HOME/.local/bin/awslocal"
+    echo "Installed awslocal to $HOME/.local/bin/awslocal"
+  else
+    echo "awscli-local already installed in venv"
+  fi
+  # Ensure ~/.local/bin is on PATH for interactive shells (non-interactive devcontainer lifecycle usually preserves PATH)
+  if ! grep -q "export PATH=\$HOME/.local/bin" "$HOME/.profile" 2>/dev/null; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.profile"
   fi
 else
-  echo "pip not found; skipping awscli-local install"
+  echo "No pipx or python3 found; skipping awscli-local install"
 fi
 
 # --- dotfiles linking ---
