@@ -1,0 +1,182 @@
+<mxfile host="65bd71144e">
+    <diagram id="codeviz-diagram" name="System Diagram">
+        <mxGraphModel dx="819" dy="1526" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="base-diagram-group" value="" style="html=1;whiteSpace=wrap;container=1;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0" parent="1" vertex="1">
+                    <mxGeometry x="30" y="-129" width="408" height="1085" as="geometry"/>
+                </mxCell>
+                <mxCell id="webapp_system_boundary" value="" style="html=1;whiteSpace=wrap;container=1;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0" parent="base-diagram-group" vertex="1">
+                    <mxGeometry x="70.33333333333333" y="193" width="513" height="769" as="geometry"/>
+                </mxCell>
+                <mxCell id="web_app_container_boundary" value="" style="html=1;whiteSpace=wrap;container=1;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0" parent="webapp_system_boundary" vertex="1">
+                    <mxGeometry x="93.08333333333333" y="-125" width="442" height="432" as="geometry"/>
+                </mxCell>
+                <mxCell id="router" value="Router" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="web_app_container_boundary" vertex="1">
+                    <mxGeometry x="27.910961661037017" y="136.25909273685045" width="56" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="controllers" value="Controllers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="web_app_container_boundary" vertex="1">
+                    <mxGeometry x="126.58514831156623" y="250.99897503337178" width="83" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="models" value="Models" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="web_app_container_boundary" vertex="1">
+                    <mxGeometry x="23.913131642347466" y="345.0870834807745" width="60" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="views" value="Views" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="web_app_container_boundary" vertex="1">
+                    <mxGeometry x="309.8190006054239" y="169.7848327502304" width="52" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="web_app_container_boundary_label" value="Web Application" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=white;spacing=5" parent="webapp_system_boundary" vertex="1">
+                    <mxGeometry x="101.08333333333333" y="-117" width="366" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="worker_container_boundary" value="" style="html=1;whiteSpace=wrap;container=1;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=1;fillOpacity=20;strokeWidth=2;containerType=none;recursiveResize=0;movable=1;resizable=1;autosize=0;dropTarget=0" parent="webapp_system_boundary" vertex="1">
+                    <mxGeometry x="302.1445311445206" y="282.589141387223" width="237" height="269" as="geometry"/>
+                </mxCell>
+                <mxCell id="job_processor" value="Job Processor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="worker_container_boundary" vertex="1">
+                    <mxGeometry x="13.885579181812147" y="113.68573680303132" width="103" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="jobs" value="Jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="worker_container_boundary" vertex="1">
+                    <mxGeometry x="105.94775415152117" y="196.35717100378906" width="45" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="worker_container_boundary_label" value="Worker" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=white;spacing=5" parent="webapp_system_boundary" vertex="1">
+                    <mxGeometry x="310.1445311445206" y="290.589141387223" width="161" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="database" value="Database" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="webapp_system_boundary" vertex="1">
+                    <mxGeometry x="56.04508246146385" y="611.9331225944446" width="73" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="webapp_system_boundary_label" value="Simple Web Application" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=white;spacing=5" parent="base-diagram-group" vertex="1">
+                    <mxGeometry x="78.33333333333333" y="193" width="437" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="user" value="End User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="base-diagram-group" vertex="1">
+                    <mxGeometry x="58.004423902587824" y="18.000103158836453" width="71" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="developer" value="Developer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="base-diagram-group" vertex="1">
+                    <mxGeometry x="732.7732780793483" y="209.17421684454166" width="78" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="localstack" value="LocalStack" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="base-diagram-group" vertex="1">
+                    <mxGeometry x="819.5207597440498" y="574.2049285381113" width="82" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="aws" value="AWS Cloud" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="base-diagram-group" vertex="1">
+                    <mxGeometry x="729.2519317690655" y="740.1587248437502" width="84" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="deployment" value="Deployment Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5" parent="base-diagram-group" vertex="1">
+                    <mxGeometry x="616.6756110028076" y="431.7332747518101" width="140" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="base-diagram-group_label" value="Base Diagram" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;labelBackgroundColor=white;spacing=5" parent="1" vertex="1">
+                    <mxGeometry x="20" y="20" width="332" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-user-router" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="user" target="router" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-user-router_label" value="Uses | HTTP" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-user-router" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-router-controllers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="router" target="controllers" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-router-controllers_label" value="Routes requests to" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-router-controllers" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-controllers-models" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="controllers" target="models" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-controllers-models_label" value="Interacts with" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-controllers-models" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-models-database" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="models" target="database" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-models-database_label" value="Reads from and writes to" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-models-database" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-controllers-views" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="controllers" target="views" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-controllers-views_label" value="Renders responses using" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-controllers-views" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-controllers-job_processor" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="controllers" target="job_processor" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-controllers-job_processor_label" value="Enqueues jobs to | Message Queue" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-controllers-job_processor" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-job_processor-jobs" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="job_processor" target="jobs" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-job_processor-jobs_label" value="Executes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-job_processor-jobs" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-job_processor-database" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="job_processor" target="database" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-job_processor-database_label" value="Reads from and writes to" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-job_processor-database" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-developer-web_app_container_boundary" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="developer" target="web_app_container_boundary" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-developer-web_app_container_boundary_label" value="Develops and tests locally" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-developer-web_app_container_boundary" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-developer-localstack" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="developer" target="localstack" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-developer-localstack_label" value="Interacts with | for local development" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-developer-localstack" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-developer-deployment" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="developer" target="deployment" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-developer-deployment_label" value="Triggers" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-developer-deployment" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-deployment-webapp_system_boundary" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="deployment" target="webapp_system_boundary" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-deployment-webapp_system_boundary_label" value="Deploys | to AWS Cloud" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-deployment-webapp_system_boundary" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-webapp_system_boundary-aws" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="webapp_system_boundary" target="aws" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-webapp_system_boundary-aws_label" value="Uses services from | in production" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-webapp_system_boundary-aws" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-e-webapp_system_boundary-localstack" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#808080;strokeWidth=2;jumpStyle=arc;jumpSize=10;spacing=15;labelBackgroundColor=white;labelBorderColor=none" parent="1" source="webapp_system_boundary" target="localstack" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge-e-webapp_system_boundary-localstack_label" value="Uses services from | in development" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="edge-e-webapp_system_boundary-localstack" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
