@@ -1,0 +1,79 @@
+<div class="counter-container">
+  <h1>Distributed Counter</h1>
+
+  <div class="counter-display">
+    <div class="counter-value" id="counter-value">
+      <%= @counter_value %>
+    </div>
+    <p class="counter-label">Current Count</p>
+  </div>
+
+  <div class="counter-actions">
+    <%= button_to "Increment Counter",
+                  increment_counters_path,
+                  method: :post,
+                  class: "increment-btn",
+                  data: { turbo: true } %>
+  </div>
+
+  <div class="counter-info">
+    <p>This counter is synchronized across multiple app instances via AWS SQS.</p>
+    <p>Instance ID: <code><%= Counter.singleton.instance_id %></code></p>
+  </div>
+</div>
+
+<style>
+.counter-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.counter-display {
+  margin: 2rem 0;
+}
+
+.counter-value {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.counter-label {
+  font-size: 1.2rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.increment-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.increment-btn:hover {
+  background: #1d4ed8;
+}
+
+.counter-info {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+.counter-info code {
+  background: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+</style>
