@@ -1,260 +1,110 @@
-# Simple Counter App with Rails, AWS, and LocalStack
+# Generic LocalStack + AWS Devcontainer Template
 
-A Rails web application that implements a simple counter and sends count updates to other app instances via AWS SQS, all running in a LocalStack development environment within devcontainers.
+A VS Code devcontainer template for local AWS development with **LocalStack**, **Terraform**, **Docker-in-Docker (dinD)**, and supporting tools. Perfect for bootstrapping any app (Next.js, Python, Go, etc.) that needs local AWS emulation – no Ruby/Rails assumptions.
 
-## 🏗️ Project Structure
+## 🏗️ Features
 
+- **LocalStack** (SQS, S3, DynamoDB, etc.) via Docker.
+- **Terraform** with example modules (SQS/S3/DynamoDB).
+- **dinD** for running AWS services + local Docker registry (ECR sim).
+- **Tools**: AWS CLI, Terraform, awslocal (`awscli-local`), jq, httpie, Node 20.
+- **VS Code**: AWS Toolkit, LocalStack Toolkit, Terraform, Prettier/ESLint/TS.
+- **Scripts**: `setup.sh`, `start/stop-localstack.sh`, `start-supporting-services.sh` (registry).
+
+## 🚀 Quick Start
+
+### 1. Open in VS Code
+- Clone/fork this repo.
+- **Reopen in Container** (Dev Containers extension).
+
+### 2. Setup Environment
+```bash
+./scripts/setup.sh
 ```
-simple-app-localstack/
-├── .devcontainer/           # VS Code devcontainer configuration
-│   └── devcontainer.json    # Container setup with Rails, AWS CLI, Terraform
-├── app/                     # Rails application
-│   ├── Gemfile             # Ruby dependencies
-│   ├── config/             # Rails configuration
-│   └── ...                 # Standard Rails structure
-├── infrastructure/          # Terraform configuration
-│   ├── main.tf             # Provider and LocalStack configuration
-│   ├── sqs.tf              # SQS queue definitions
-│   └── outputs.tf          # Terraform outputs
-├── scripts/                # Setup and utility scripts
-│   └── setup.sh            # Development environment setup
-├── app-docker-images/      # Dockerfiles for app images (dev/prod)
-└── README.md               # This file
+- Starts LocalStack (4566), Docker registry (5001).
+- Runs `terraform init/apply` (empty by default; uncomment modules).
+
+### 3. Bootstrap Your App (e.g., Next.js)
+```bash
+npx create-next-app@latest my-app --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+cd my-app
+npm run dev  # http://localhost:3000
 ```
 
-## 🚀 Getting Started
+### 4. Use LocalStack
+```bash
+# Health check
+curl http://localhost:4566/health
 
-### Prerequisites
+# awslocal (pip-installed awscli-local)
+awslocal sqs list-queues
 
-- Docker and Docker Compose
-- VS Code with the following extensions:
-  - Dev Containers extension
-  - AWS Toolkit
-  - LocalStack Toolkit
+# AWS CLI
+aws --endpoint-url=http://localhost:4566 s3 ls
+```
 
-### Setup
-
-1. **Open in VS Code**: Open this project in VS Code
-2. **Reopen in Container**: When prompted, click "Reopen in Container" or use the Command Palette (`Cmd+Shift+P`) and select "Dev Containers: Reopen in Container"
-3. **Wait for Setup**: The devcontainer will automatically:
-   - Build the development environment
-   - Install all dependencies
-   - Set up LocalStack infrastructure
-   - Configure the Rails application
-
-### Development Workflow
-
-Once the devcontainer is running:
-
-1. **Start the Rails server**:
-
-   ```bash
-   cd /workspace/app
-   rails server
-   ```
-
-2. **Access the application**: http://localhost:3000
-
-3. **Access LocalStack**: http://localhost:4566
-
-4. **Monitor SQS queues**:
-   ```bash
-   aws --endpoint-url=http://localstack:4566 sqs list-queues
-   ```
+### 5. Terraform Infra
+```bash
+cd infrastructure
+terraform init
+terraform plan  # Empty/no-op by default
+# Edit main.tf to uncomment modules, then apply
+terraform apply
+```
 
 ## 🏢 Architecture
 
-### Services
-
-- **Rails App**: Main web application with counter functionality
-- **LocalStack**: Local AWS services emulation (SQS)
-- **Redis**: Session store and Sidekiq backend
-- **Sidekiq**: Background job processing
-
-### AWS Resources (via LocalStack)
-
-- **SQS Queue**: `counter-queue` for inter-app communication
-- **SQS DLQ**: `counter-queue-dlq` for failed messages
-
-## 🔧 Configuration
-
-### Environment Variables
-
-The devcontainer automatically sets up these environment variables:
-
-```bash
-AWS_DEFAULT_REGION=us-east-1
-AWS_ACCESS_KEY_ID=test
-AWS_SECRET_ACCESS_KEY=test
-LOCALSTACK_ENDPOINT=http://localstack:4566
-COUNTER_QUEUE_URL=http://localstack:4566/000000000000/counter-queue
-REDIS_URL=redis://redis:6379/0
+```
+.
+├── .devcontainer/     # Dev env (Node/Terraform/AWS/LocalStack)
+├── infrastructure/    # Terraform (provider + modules/sqs|s3|dynamodb)
+├── scripts/           # Utils (setup, localstack, registry)
+├── README.md
+└── [your-app/]        # Bootstrap here (e.g., Next.js)
 ```
 
-### Terraform Configuration
+**LocalStack Services**: SQS/S3/DynamoDB ready (add endpoints in `main.tf`).
 
-Infrastructure is defined in the `infrastructure/` directory:
+**Registry**: localhost:5001 (push/pull images for ECR sim).
 
-- LocalStack provider configuration
-- SQS queue and DLQ creation
-- Outputs for queue URLs
+## � Customize Terraform
 
-## 📝 Next Steps
+1. Uncomment modules in `infrastructure/main.tf`.
+2. Set vars (e.g., `terraform apply -var="queue_name=my-queue"`).
+3. Outputs in `outputs.tf` / module outputs.
 
-After setting up the basic structure, you'll want to:
-
-1. **Generate Rails components**:
-
-   ```bash
-   rails generate controller Counter index
-   rails generate model CounterEvent count:integer message:text
-   ```
-
-2. **Implement the counter logic**:
-
-   - Counter controller with increment/decrement actions
-   - SQS message publishing
-   - Background job for message processing
-
-3. **Add views and styling**:
-   - Counter display
-   - Action buttons
-   - Real-time updates (via ActionCable or polling)
-
-## 🛠️ Useful Commands
-
-### Rails
-
-```bash
-rails server                    # Start the Rails server
-rails console                   # Rails console
-rails generate --help           # See available generators
-rails db:migrate                # Run database migrations
+**Example SQS**:
+```
+module "my_sqs" {
+  source = "./modules/sqs"
+  queue_name = "my-app-queue"
+  ...
+}
 ```
 
-### Terraform
+## 🔧 Useful Commands
 
-```bash
-cd infrastructure
-terraform plan                  # Preview changes
-terraform apply                 # Apply changes
-terraform destroy               # Destroy infrastructure
-```
-
-### AWS CLI (LocalStack)
-
-```bash
-# List SQS queues
-aws --endpoint-url=http://localstack:4566 sqs list-queues
-
-# Send a test message
-aws --endpoint-url=http://localstack:4566 sqs send-message \
-  --queue-url http://localstack:4566/000000000000/counter-queue \
-  --message-body "Test message"
-
-# Receive messages
-aws --endpoint-url=http://localstack:4566 sqs receive-message \
-  --queue-url http://localstack:4566/000000000000/counter-queue
-```
-
-### Docker
-
-```bash
-./scripts/start-supporting-services.sh   # starts Redis and registry via docker run
-./scripts/registry-bridge.sh status      # show registry status and list images
-
-## 🧰 Devcontainer image and developer tooling
-
-This repository now builds the devcontainer from a Dockerfile (`.devcontainer/Dockerfile`) so we can bake developer tools into the image.
-
-- Tools installed in the devcontainer image:
-   - `redis-cli` (provided by `redis-tools`) — quick Redis checks and troubleshooting
-   - `jq` — JSON CLI processor
-   - `http` (HTTPie) — friendlier HTTP client than curl for quick API calls
-
-### Rebuild the devcontainer
-
-After pulling the repo changes you'll need to rebuild the devcontainer so the new Dockerfile is used. In VS Code:
-
-1. Open the Command Palette (Ctrl/Cmd+Shift+P)
-2. Select `Dev Containers: Rebuild and Reopen in Container`
-
-Or using the Dev Container CLI:
-
-```bash
-npm i -g @devcontainers/cli
-devcontainer build --workspace-folder . --file .devcontainer/Dockerfile
-devcontainer up --workspace-folder .
-```
-
-### Quick checks inside the devcontainer
-
-which redis-cli jq http
-   You can use the helper scripts to manage supporting services (registry and Redis) and the Local Docker registry:
-
-   ```bash
-   ./scripts/start-supporting-services.sh   # starts Redis and registry via docker run
-   ./scripts/registry-bridge.sh start       # starts the local registry only (if needed)
-   ./scripts/registry-bridge.sh status      # show registry status and list images
-   ./scripts/registry-bridge.sh clean       # remove registry container & data
-   ```
-
-Use the helper script to start local supporting services (Redis and a local Docker registry):
-
-```bash
-./scripts/start-supporting-services.sh
-```
-
-If you need to stop/remove them:
-
-```bash
-docker rm -f redis registry || true
-```
-
-```
+| Service | Command |
+|---------|---------|
+| **LocalStack** | `./scripts/start-localstack.sh` / `stop-localstack.sh` |
+| **Registry** | `./scripts/start-supporting-services.sh` |
+| **Terraform** | `cd infrastructure && terraform init && terraform plan` |
+| **S3** | `awslocal s3 mb s3://my-bucket` |
+| **SQS** | `awslocal sqs create-queue --queue-name my-queue` |
+| **DynamoDB** | `awslocal dynamodb create-table --table-name my-table --attribute-definitions AttributeName=pk,AttributeType=S --key-schema AttributeName=pk,KeyType=HASH` |
+| **Test** | `http GET localhost:4566/health` (httpie) |
 
 ## 🐛 Troubleshooting
 
-### LocalStack not responding
+- **LocalStack down**: `./scripts/start-localstack.sh --remove`
+- **Ports conflict**: Kill on 4566/3000/5001.
+- **Terraform state**: `rm infrastructure/terraform.tfstate*`
+- **Rebuild devcontainer**: Cmd+Shift+P > "Dev Containers: Rebuild..."
 
-```bash
-# Check LocalStack health
-curl http://localhost:4566/health
+## 📚 Technologies
 
-# Restart LocalStack (example using Docker)
-docker restart <localstack-container-name>
+- **Base**: Debian Bookworm + Node 20, Terraform latest.
+- **LocalStack 3.x**, AWS CLI, awslocal.
+- **dinD** (Buildx/Compose v2).
 
-# Or if you use the LocalStack CLI or supervisor, restart via that tool
-```
-
-### Rails server issues
-
-```bash
-# Check if gems are installed
-bundle check
-
-# Reinstall gems
-bundle install
-
-# Check database
-rails db:create db:migrate
-```
-
-### Port conflicts
-
-- Rails: 3000
-- LocalStack: 4566
-- Redis: 6379
-
-Make sure these ports are available on your host machine.
-
-## 📚 Technologies Used
-
-- **Ruby on Rails 7.0**: Web framework
-- **LocalStack**: Local AWS development
-- **Terraform**: Infrastructure as Code
-- **Docker**: Containerization
-- **Sidekiq**: Background job processing
-- **Redis**: In-memory data store
-- **AWS SDK**: AWS service integration
-- **SQLite**: Development database
+Fork & customize! 🚀

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Setup script for the Rails + LocalStack development environment
+# Setup script for generic LocalStack + AWS devcontainer environment
 
-echo "🚀 Setting up Rails + LocalStack development environment..."
+echo "🚀 Setting up LocalStack + AWS + Terraform development environment..."
 
 # Get the script directory and workspace root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,97 +10,41 @@ WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
 
 echo "📁 Working in: $WORKSPACE_ROOT"
 
-# Navigate to the app directory
-cd "$WORKSPACE_ROOT/app"
-
-# Install Ruby gems (if Gemfile exists)
-if [ -f "Gemfile" ]; then
-    echo "📦 Installing Ruby gems..."
-    bundle install
+# Set up Terraform infrastructure (if infrastructure/ exists)
+if [ -d "$WORKSPACE_ROOT/infrastructure" ]; then
+    echo "🏗️ Setting up Terraform infrastructure..."
+    cd "$WORKSPACE_ROOT/infrastructure"
+    terraform init
+    terraform apply -auto-approve || echo "Terraform apply failed - check config"
+    cd "$WORKSPACE_ROOT"
 else
-    echo "⚠️  No Gemfile found, skipping gem installation"
+    echo "⚠️  No infrastructure/ directory found, skipping Terraform setup"
 fi
 
-# Install JavaScript dependencies (if package.json exists)
-if [ -f "package.json" ]; then
-    echo "📦 Installing JavaScript dependencies..."
-    yarn install
-else
-    echo "⚠️  No package.json found, skipping JavaScript dependencies"
-fi
-
-# Set up the database
-echo "🗄️ Setting up database..."
-if [ ! -f "config/database.yml" ]; then
-    echo "Creating database configuration..."
-    cat > config/database.yml << 'EOF'
-default: &default
-  adapter: sqlite3
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  timeout: 5000
-
-development:
-  <<: *default
-  database: db/development.sqlite3
-
-test:
-  <<: *default
-  database: db/test.sqlite3
-
-production:
-  <<: *default
-  database: db/production.sqlite3
-EOF
-fi
-
-# Create database if Rails is available
-if command -v rails >/dev/null 2>&1 && [ -f "Gemfile" ]; then
-    echo "Creating database..."
-    rails db:create 2>/dev/null || echo "Database already exists or will be created on first migration"
-else
-    echo "⚠️  Rails not available yet, skipping database creation"
-fi
-
-# Navigate to infrastructure directory and set up Terraform
-echo "🏗️ Setting up Terraform infrastructure..."
-cd "$WORKSPACE_ROOT/infrastructure"
-
-# Initialize Terraform
-terraform init
-
-# SSH keys are now managed entirely by Terraform (no filesystem keys needed)
-echo "🔑 SSH keys will be managed by Terraform (no filesystem keys created)..."
-
-# Start supporting services (Redis, Registry)
+# Start supporting services (Docker Registry)
 echo "🔧 Starting supporting services..."
 bash "$WORKSPACE_ROOT/scripts/start-supporting-services.sh"
 
 # Start LocalStack using Docker-in-Docker
-echo "🐳 Starting LocalStack using Docker-in-Docker..."
-bash "$WORKSPACE_ROOT/scripts/start-localstack.sh"
-
-# Apply Terraform configuration
-echo "🔧 Applying Terraform configuration..."
-terraform plan
-terraform apply -auto-approve
-
-# SSH keys are now extracted dynamically by ssh-into-instance.sh script
-echo "✅ SSH keys managed by Terraform - use './scripts/ssh-into-instance.sh' to connect to instances"
+echo "🐳 Starting LocalStack..."
+if [ -f "$WORKSPACE_ROOT/scripts/start-localstack.sh" ]; then
+    bash "$WORKSPACE_ROOT/scripts/start-localstack.sh"
+else
+    echo "⚠️  start-localstack.sh not found, start manually"
+fi
 
 echo "✅ Setup complete!"
 echo ""
 echo "📋 Next steps:"
-echo "1. Run 'rails generate' commands to create your controllers and models"
-echo "2. Run 'rails server' to start the application"
-echo "3. Access the app at http://localhost:3000"
-echo "4. LocalStack is available at http://localhost:4566"
+echo "1. Bootstrap your app (e.g., npx create-next-app@latest my-app)"
+echo "2. Run your app dev server (e.g., npm run dev)"
+echo "3. Access app at http://localhost:3000"
+echo "4. LocalStack at http://localhost:4566"
 echo ""
 echo "🔍 Useful commands:"
-echo "- rails server: Start the Rails server"
-echo "- terraform plan: Preview infrastructure changes"
-echo "- terraform apply: Apply infrastructure changes"
-echo "- aws --endpoint-url=http://localhost:4566 sqs list-queues: List SQS queues"
-echo "- awslocal sqs list-queues: List SQS queues (using awslocal)"
-echo "- awslocal s3 ls: List S3 buckets"
-echo "- bash ./scripts/start-localstack.sh: Start LocalStack"
-echo "- bash ./scripts/stop-localstack.sh: Stop LocalStack"
+echo "- awslocal sqs list-queues  # List queues (awslocal from awscli-local)"
+echo "- aws --endpoint-url=http://localhost:4566 s3 ls  # AWS CLI"
+echo "- terraform -chdir=infrastructure plan  # Preview infra"
+echo "- terraform -chdir=infrastructure apply  # Apply infra"
+echo "- scripts/start-localstack.sh  # Restart LocalStack"
+echo "- scripts/stop-localstack.sh   # Stop LocalStack"

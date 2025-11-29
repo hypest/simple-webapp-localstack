@@ -4,10 +4,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
-    }
   }
 }
 
@@ -20,11 +16,36 @@ provider "aws" {
   skip_requesting_account_id  = true
 
   endpoints {
-    sqs                  = "http://localhost:4566"
-    ec2                  = "http://localhost:4566"
-    iam                  = "http://localhost:4566"
-    autoscaling          = "http://localhost:4566"
-    elbv2                = "http://localhost:4566"
-    elasticloadbalancing = "http://localhost:4566"
+    sqs     = "http://localhost:4566"
+    s3      = "http://localhost:4566"
+    dynamodb = "http://localhost:4566"
+    # Add more services as needed, e.g.:
+    # ec2     = "http://localhost:4566"
+    # iam     = "http://localhost:4566"
   }
 }
+
+# Example modules - uncomment and customize for your app
+# module "example_sqs" {
+#   source = "./modules/sqs"
+# 
+#   queue_name   = "my-app-queue"
+#   environment  = var.environment
+#   project_name = var.project_name
+# }
+# 
+# module "example_s3" {
+#   source = "./modules/s3"
+# 
+#   bucket_name  = "my-app-bucket"
+#   environment  = var.environment
+#   project_name = var.project_name
+# }
+# 
+# module "example_dynamodb" {
+#   source = "./modules/dynamodb"
+# 
+#   table_name   = "my-app-table"
+#   environment  = var.environment
+#   project_name = var.project_name
+# }

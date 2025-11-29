@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Start supporting services for devcontainer volume setup
+# Start supporting services for devcontainer (Docker Registry only)
 echo "🚀 Starting supporting services..."
 
 # Create network if it doesn't exist
@@ -25,21 +25,17 @@ start_or_reuse_container() {
     docker run -d --name "${name}" ${extra_args} "${image}" >/dev/null
 }
 
-# Start Redis
-start_or_reuse_container "redis" "redis:7-alpine" "--network devcontainer-network -p 6379:6379"
-
-## Start Docker Registry (standardized to local_registry and volume simple_app_local_registry_data)
+## Start Docker Registry (for local ECR simulation)
 # If registry-bridge.sh already started a registry named 'local_registry' (port 5001), reuse it.
 if docker ps --format '{{.Names}}' | grep -q '^local_registry$'; then
     echo "✅ local_registry already running (reused)"
 else
-    # Ensure the volume exists with the same name used by registry-bridge.sh
-    docker volume inspect simple_app_local_registry_data >/dev/null 2>&1 || \
-        docker volume create simple_app_local_registry_data >/dev/null
+    # Ensure the volume exists
+    docker volume inspect devcontainer_local_registry_data >/dev/null 2>&1 || \
+        docker volume create devcontainer_local_registry_data >/dev/null
 
-    start_or_reuse_container "local_registry" "registry:2" "--network devcontainer-network -p 5001:5000 -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data -v simple_app_local_registry_data:/data"
+    start_or_reuse_container "local_registry" "registry:2" "--network devcontainer-network -p 5001:5000 -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data -v devcontainer_local_registry_data:/data"
 fi
 
 echo "✅ Supporting services started!"
-echo "   - Redis: localhost:6379"
 echo "   - Registry: localhost:5001"

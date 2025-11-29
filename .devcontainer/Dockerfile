@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1.3
-# Devcontainer Dockerfile based on the official Ruby devcontainer image
-FROM mcr.microsoft.com/devcontainers/ruby:3.4-bookworm
+FROM mcr.microsoft.com/devcontainers/base:bookworm
 
 # If a corporate TLS interception CA is provided as a build secret (id=zscaler_ca),
 # install it into the image trust store so apt/curl inside the build trusts intercepted HTTPS.
@@ -14,16 +13,14 @@ RUN --mount=type=secret,id=zscaler_ca,target=/run/secrets/zscaler_ca \
   echo "No zscaler CA provided as build secret; skipping."; \
   fi'
 
-# Install redis-tools (provides redis-cli) and any other lightweight tools we want in the devcontainer
+# Install lightweight tools: jq, httpie, python3 for awslocal (awscli-local)
 RUN apt-get update -qq \
   && apt-get install -y --no-install-recommends \
-  redis-tools jq httpie \
+  jq httpie \
   python3 python3-venv python3-distutils python3-pip \
   && python3 -m pip install --upgrade pip setuptools wheel \
-  && python3 -m pip install pipenv awscli-local || true \
+  && python3 -m pip install awscli-local \
   && rm -rf /var/lib/apt/lists/*
 
-# Keep the rest of the base image behavior
-
 # Set a sensible workdir
-WORKDIR /workspaces
+WORKDIR /workspace

@@ -1,5 +1,5 @@
 {
-  "name": "Rails + AWS + LocalStack Development",
+  "name": "LocalStack + AWS + Terraform Dev Environment",
   "build": {
     "dockerfile": "./Dockerfile",
     "context": ".."
@@ -17,11 +17,11 @@
     },
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.5"
+      "version": "latest"
     },
     "ghcr.io/localstack/devcontainer-feature/localstack-cli": {},
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
+      "version": "20"
     },
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
@@ -32,17 +32,15 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "rebornix.Ruby",
-        "kaiwood.endwise",
-        "castwide.solargraph",
         "ms-vscode.vscode-json",
         "HashiCorp.terraform",
         "ms-vscode.aws-toolkit",
-        "localstack.localstack-toolkit"
+        "localstack.localstack-toolkit",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.vscode-typescript-next"
       ],
       "settings": {
-        "ruby.intellisense": "rubyLocate",
-        "ruby.codeCompletion": "rcodetools",
         "aws.telemetry": false,
         "localstack.endpoint": "http://host.docker.internal:4566",
         "docker.defaultPlatform": "linux/amd64"
@@ -56,7 +54,7 @@
   ],
   "portsAttributes": {
     "3000": {
-      "label": "Rails Server",
+      "label": "App Server",
       "onAutoForward": "notify"
     },
     "4566": {
@@ -73,11 +71,7 @@
     "AWS_DEFAULT_REGION": "us-east-1",
     "AWS_ACCESS_KEY_ID": "test",
     "AWS_SECRET_ACCESS_KEY": "test",
-    "LOCALSTACK_ENDPOINT": "http://localhost:4566",
-    "RAILS_ENV": "development",
-    "DOCKER_HOST": "unix:///var/run/docker.sock",
-    "REDIS_URL": "redis://localhost:6379/0",
-    "COUNTER_QUEUE_URL": "http://localhost:4566/000000000000/counter-queue"
+    "LOCALSTACK_ENDPOINT": "http://host.docker.internal:4566"
   },
-  "postStartCommand": "bash -c 'cd /workspaces/* 2>/dev/null || cd /workspace 2>/dev/null; pwd; bash .devcontainer/scripts/start-services.sh'"
+  "postStartCommand": "bash -c 'cd /workspace && pwd && bash .devcontainer/scripts/start-services.sh || echo \"No start-services.sh, manual setup needed\"'"
 }
