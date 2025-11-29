@@ -18,8 +18,11 @@ RUN apt-get update -qq \
   && apt-get install -y --no-install-recommends \
   jq httpie \
   python3 python3-venv python3-distutils python3-pip \
+  && apt-get install -y --no-install-recommends pipx \
+  && python3 -m venv /opt/venv \
+  && . /opt/venv/bin/activate \
   && python3 -m pip install --upgrade pip setuptools wheel \
-  && python3 -m pip install awscli-local \
+  && pip install awscli-local \
   && rm -rf /var/lib/apt/lists/*
 
 # Set a sensible workdir
