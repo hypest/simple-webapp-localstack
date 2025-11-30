@@ -1,0 +1,17 @@
+{
+  "name": "LocalStack + AWS + Terraform",
+  "description": "Local AWS development with LocalStack (SQS/S3/DynamoDB), Terraform, Docker-in-Docker, Node 20. VS Code devcontainer template for AWS-local emulation.",
+  "icon": "https://raw.githubusercontent.com/devcontainers/images/main/src/base/icon.svg",
+  "categories": [
+    "AWS",
+    "Infrastructure",
+    "Development Environment"
+  ],
+  "platforms": [
+    "linux"
+  ],
+  "publishAsMarketplaceVSix": false,
+  "devContainerEnvironments": [],
+  "remoteUser": "vscode",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm"
+}

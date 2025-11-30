@@ -107,4 +107,22 @@ module "my_sqs" {
 - **LocalStack 3.x**, AWS CLI, awslocal.
 - **dinD** (Buildx/Compose v2).
 
+## 🎯 Use as Devcontainer Template
+
+1. **GitHub Setup**:
+   - Push this repo.
+   - Repo Settings > **Template repository** > Save.
+
+2. **VSCode**:
+   - Cmd+Shift+P > "Dev Containers: Add Dev Container Configuration Files..."
+   - Search "LocalStack" or your repo name.
+   - Or clone template repo > Reopen in Container.
+
+3. **Test**:
+   ```
+   npx @devcontainers/cli@latest up --workspace-folder .
+   ```
+
+See [containers.dev](https://containers.dev/) for more.
+
 Fork & customize! 🚀
