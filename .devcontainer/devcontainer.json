@@ -73,5 +73,5 @@
     "AWS_SECRET_ACCESS_KEY": "test",
     "LOCALSTACK_ENDPOINT": "http://host.docker.internal:4566"
   },
-  "postStartCommand": "bash -c 'cd /workspace && pwd && bash .devcontainer/scripts/start-services.sh || echo \"No start-services.sh, manual setup needed\"'"
+  "postStartCommand": "bash -c 'cd /workspaces/* 2>/dev/null || cd /workspace 2>/dev/null; pwd; bash .devcontainer/scripts/start-services.sh'"
 }
